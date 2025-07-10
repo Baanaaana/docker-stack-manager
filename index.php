@@ -130,6 +130,13 @@ try {
             text-align: center;
         }
 
+        .docker-icon {
+            font-size: 4em;
+            color: #2496ed;
+            margin-bottom: 20px;
+            display: block;
+        }
+
         h1 {
             color: #2c3e50;
             margin-bottom: 30px;
@@ -308,7 +315,8 @@ try {
 </head>
 <body>
     <div class="container">
-        <h1><i class="mdi mdi-docker"></i> Docker Stack Manager</h1>
+        <i class="mdi mdi-docker docker-icon"></i>
+        <h1>Docker Stack Manager</h1>
         
         <?php if (isset($error)): ?>
         <div class="config-section">
