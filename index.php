@@ -339,7 +339,7 @@ try {
 
         <div class="stack-info" id="stackInfo" style="display: none;">
             <p><strong>Stack Name:</strong> <span id="stackNameDisplay"></span></p>
-            <p style="margin-bottom: 15px;"><strong>Status:</strong> <span id="stackStatus"></span></p>
+            <p style="margin-bottom: 15px;"><strong>Stack Status:</strong> <span id="stackStatus"></span></p>
             
             <div class="services-list" id="servicesList">
                 <h4>Services:</h4>
