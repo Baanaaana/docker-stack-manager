@@ -2,6 +2,57 @@
 // Prevent search engine indexing and crawling
 header('X-Robots-Tag: noindex, nofollow, nosnippet, noarchive, nocache');
 
+// Function to get client IP address
+function getClientIp() {
+    $ipKeys = ['HTTP_X_FORWARDED_FOR', 'HTTP_X_REAL_IP', 'HTTP_CLIENT_IP', 'REMOTE_ADDR'];
+    
+    foreach ($ipKeys as $key) {
+        if (array_key_exists($key, $_SERVER) && !empty($_SERVER[$key])) {
+            $ip = $_SERVER[$key];
+            // Handle comma-separated IPs (X-Forwarded-For can contain multiple IPs)
+            if (strpos($ip, ',') !== false) {
+                $ip = trim(explode(',', $ip)[0]);
+            }
+            return $ip;
+        }
+    }
+    
+    return '127.0.0.1'; // Default fallback
+}
+
+// Function to check if IP is in CIDR range
+function ipInCidr($ip, $cidr) {
+    if (strpos($cidr, '/') === false) {
+        // Single IP address
+        return $ip === $cidr;
+    }
+    
+    list($network, $mask) = explode('/', $cidr);
+    $ipLong = ip2long($ip);
+    $networkLong = ip2long($network);
+    $maskLong = -1 << (32 - $mask);
+    
+    return ($ipLong & $maskLong) === ($networkLong & $maskLong);
+}
+
+// Function to check if client IP is allowed
+function isIpAllowed($allowedIps) {
+    if (empty($allowedIps)) {
+        return true; // If no IPs specified, allow all
+    }
+    
+    $clientIp = getClientIp();
+    $allowedIpsList = array_map('trim', explode(',', $allowedIps));
+    
+    foreach ($allowedIpsList as $allowedIp) {
+        if (ipInCidr($clientIp, $allowedIp)) {
+            return true;
+        }
+    }
+    
+    return false;
+}
+
 // Load environment variables from .env file
 function loadEnv($path) {
     if (!file_exists($path)) {
@@ -28,6 +79,13 @@ try {
     $portainerUrl = $config['PORTAINER_URL'] ?? '';
     $accessToken = $config['PORTAINER_TOKEN'] ?? '';
     $stackName = $config['STACK_NAME'] ?? '';
+    $allowedIps = $config['ALLOWED_IPS'] ?? '';
+    
+    // Check IP access first
+    if (!isIpAllowed($allowedIps)) {
+        http_response_code(403);
+        die('<!DOCTYPE html><html><head><title>Access Denied</title></head><body><h1>403 - Access Denied</h1><p>Your IP address is not authorized to access this page.</p></body></html>');
+    }
     
     if (empty($portainerUrl) || empty($accessToken) || empty($stackName)) {
         throw new Exception('Missing required environment variables: PORTAINER_URL, PORTAINER_TOKEN, STACK_NAME');
