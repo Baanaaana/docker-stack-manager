@@ -1,4 +1,7 @@
 <?php
+// Prevent search engine indexing and crawling
+header('X-Robots-Tag: noindex, nofollow, nosnippet, noarchive, nocache');
+
 // Load environment variables from .env file
 function loadEnv($path) {
     if (!file_exists($path)) {
@@ -38,6 +41,7 @@ try {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow, nosnippet, noarchive, nocache">
     <title>Docker Stack Manager</title>
     <style>
         * {
