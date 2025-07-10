@@ -131,7 +131,7 @@ try {
         }
 
         .docker-icon {
-            font-size: 4em;
+            font-size: 6em;
             color: #2496ed;
             margin-bottom: 20px;
             display: block;
