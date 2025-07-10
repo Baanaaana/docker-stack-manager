@@ -133,7 +133,7 @@ try {
 
         .docker-icon {
             font-size: 6em;
-            color: #2496ed;
+            color: #1d63ed;
             margin-bottom: 20px;
             display: block;
         }
