@@ -161,6 +161,7 @@ try {
             padding: 20px;
             margin: 20px 0;
             border-left: 4px solid #667eea;
+            text-align: left;
         }
 
         .status-indicator {
