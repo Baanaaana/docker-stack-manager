@@ -338,7 +338,7 @@ try {
         <div class="alert alert-error" id="errorAlert"></div>
 
         <div class="stack-info" id="stackInfo" style="display: none;">
-            <p><strong>Name:</strong> <span id="stackNameDisplay"></span></p>
+            <p><strong>Stack Name:</strong> <span id="stackNameDisplay"></span></p>
             <p style="margin-bottom: 15px;"><strong>Status:</strong> <span id="stackStatus"></span></p>
             
             <div class="services-list" id="servicesList">
@@ -347,10 +347,10 @@ try {
         </div>
 
         <div class="button-group">
-            <button class="btn btn-primary" onclick="getStackStatus()" <?php echo isset($error) ? 'disabled' : ''; ?>>Get Status</button>
-            <button class="btn btn-success" id="startBtn" onclick="startStack()" style="display: none;" <?php echo isset($error) ? 'disabled' : ''; ?>>Start Stack</button>
-            <button class="btn btn-danger" id="stopBtn" onclick="stopStack()" style="display: none;" <?php echo isset($error) ? 'disabled' : ''; ?>>Stop Stack</button>
-            <button class="btn btn-warning" id="restartBtn" onclick="restartStack()" style="display: none;" <?php echo isset($error) ? 'disabled' : ''; ?>>Restart Stack</button>
+            <button class="btn btn-primary" onclick="getStackStatus()" <?php echo isset($error) ? 'disabled' : ''; ?>>Status</button>
+            <button class="btn btn-success" id="startBtn" onclick="startStack()" style="display: none;" <?php echo isset($error) ? 'disabled' : ''; ?>>Start</button>
+            <button class="btn btn-danger" id="stopBtn" onclick="stopStack()" style="display: none;" <?php echo isset($error) ? 'disabled' : ''; ?>>Stop</button>
+            <button class="btn btn-warning" id="restartBtn" onclick="restartStack()" style="display: none;" <?php echo isset($error) ? 'disabled' : ''; ?>>Restart</button>
         </div>
     </div>
 
@@ -502,10 +502,6 @@ try {
             
             statusElement.innerHTML = `<span class="status-indicator ${statusClass}"></span>${statusText} (${stackType})`;
             
-            // These elements were removed from the HTML, so we'll skip setting them
-            // document.getElementById('stackCreated').textContent = new Date(stack.CreationDate * 1000).toLocaleString();
-            // document.getElementById('stackUpdated').textContent = new Date(stack.UpdateDate * 1000).toLocaleString();
-
             // Show/hide buttons based on stack status
             const isRunning = stack.Status === 1;
             const startBtn = document.getElementById('startBtn');
