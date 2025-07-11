@@ -415,7 +415,7 @@ try {
             border-radius: 12px;
             width: 90%;
             /* max-width: 900px; */
-            max-height: 80vh;
+            max-height: 90vh;
             display: flex;
             flex-direction: column;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
@@ -499,7 +499,7 @@ try {
             font-size: 13px;
             line-height: 1.5;
             overflow-x: auto;
-            max-height: 500px;
+            max-height: 80vh;
             overflow-y: auto;
             white-space: pre-wrap;
             word-wrap: break-word;
