@@ -142,10 +142,27 @@ try {
             color: #1d63ed;
             display: block;
             transition: transform 0.3s ease;
+            animation: float 3s ease-in-out infinite;
         }
         
         .docker-icon:hover {
             transform: scale(1.1);
+            animation-play-state: paused;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+            25% {
+                transform: translateY(-3px) rotate(0.5deg);
+            }
+            50% {
+                transform: translateY(-1px) rotate(0deg);
+            }
+            75% {
+                transform: translateY(-2px) rotate(-0.5deg);
+            }
         }
 
         .reload-overlay {
