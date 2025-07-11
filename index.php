@@ -414,7 +414,7 @@ try {
             margin: 50px auto;
             border-radius: 12px;
             width: 90%;
-            max-width: 80vw;
+            /* max-width: 900px; */
             max-height: 80vh;
             display: flex;
             flex-direction: column;
@@ -1182,7 +1182,8 @@ try {
                 const messageEl = document.getElementById('confirmMessage');
                 const confirmBtn = document.getElementById('confirmBtn');
                 
-                messageEl.textContent = message;
+                // Convert newlines to <br> for proper formatting
+                messageEl.innerHTML = message.replace(/\n/g, '<br>');
                 confirmBtn.className = isDanger ? 'btn btn-danger' : 'btn btn-primary';
                 modal.style.display = 'block';
             });
@@ -1203,7 +1204,7 @@ try {
         
         // Container restart functionality
         async function restartContainer(containerId, containerName) {
-            const confirmed = await showConfirmation(`Are you sure you want to restart container "${containerName}"?`);
+            const confirmed = await showConfirmation(`Are you sure you want to restart container?\n\n"${containerName}"`);
             if (!confirmed) {
                 return;
             }
