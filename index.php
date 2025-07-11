@@ -905,6 +905,13 @@ try {
                 font-size: 0.85em;
             }
             
+            .service-item > span:first-child {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                min-width: 0;
+            }
+            
             .service-item .btn-sm {
                 padding: 4px 6px;
                 font-size: 12px;
