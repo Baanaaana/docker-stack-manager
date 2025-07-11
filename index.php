@@ -438,6 +438,17 @@ try {
             }
         }
 
+        @keyframes slideDownCentered {
+            from {
+                transform: translateY(-80%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(-50%);
+                opacity: 1;
+            }
+        }
+
         .modal-header {
             padding: 20px;
             border-bottom: 1px solid #e0e0e0;
@@ -683,6 +694,7 @@ try {
             position: relative;
             top: 50%;
             transform: translateY(-50%);
+            animation: slideDownCentered 0.3s ease-out;
         }
 
         .confirm-icon {
@@ -777,6 +789,10 @@ try {
             </div>
             <div class="modal-body">
                 <div class="logs-controls">
+                    <button class="btn btn-sm btn-primary" onclick="refreshLogs()">
+                        <span class="btn-spinner" style="display: none;"></span>
+                        <span class="btn-text">Refresh</span>
+                    </button>
                     <label class="toggle-switch">
                         <input type="checkbox" id="streamLogs" checked onchange="toggleStreaming()">
                         <span class="toggle-slider"></span>
@@ -791,10 +807,6 @@ try {
                         <span class="lines-label">Lines:</span>
                         <input type="number" id="logLines" value="100" min="10" max="1000" class="lines-input">
                     </div>
-                    <button class="btn btn-sm btn-primary" onclick="refreshLogs()">
-                        <span class="btn-spinner" style="display: none;"></span>
-                        <span class="btn-text">Refresh</span>
-                    </button>
                 </div>
                 <pre class="logs-content" id="logsContent">Loading logs...</pre>
             </div>
