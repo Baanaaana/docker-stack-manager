@@ -569,6 +569,64 @@ try {
             }
         }
 
+        /* Toggle Switch Styles */
+        .toggle-switch {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .toggle-switch input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: relative;
+            width: 48px;
+            height: 24px;
+            background: #95a5a6;
+            border-radius: 24px;
+            transition: all 0.3s ease;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .toggle-slider::before {
+            content: '';
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            left: 3px;
+            top: 3px;
+            background: white;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .toggle-switch input:checked + .toggle-slider {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+        }
+
+        .toggle-switch input:checked + .toggle-slider::before {
+            transform: translateX(24px);
+        }
+
+        .toggle-switch:hover .toggle-slider {
+            box-shadow: 0 0 8px rgba(102, 126, 234, 0.4);
+        }
+
+        .toggle-label {
+            font-size: 14px;
+            color: #5a6c7d;
+            font-weight: 500;
+        }
+
         /* Confirmation Modal Styles */
         .confirm-modal {
             max-width: 450px;
@@ -668,14 +726,18 @@ try {
             </div>
             <div class="modal-body">
                 <div class="logs-controls">
-                    <label>
-                        <input type="checkbox" id="streamLogs" checked onchange="toggleStreaming()"> Auto-refresh
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="streamLogs" checked onchange="toggleStreaming()">
+                        <span class="toggle-slider"></span>
+                        <span class="toggle-label">Auto-refresh</span>
                     </label>
-                    <label>
-                        <input type="checkbox" id="autoScroll" checked> Auto-scroll
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="autoScroll" checked>
+                        <span class="toggle-slider"></span>
+                        <span class="toggle-label">Auto-scroll</span>
                     </label>
-                    <label>
-                        Lines: <input type="number" id="logLines" value="100" min="10" max="1000" style="width: 80px;">
+                    <label style="display: flex; align-items: center; gap: 8px; color: #5a6c7d;">
+                        Lines: <input type="number" id="logLines" value="100" min="10" max="1000" style="width: 80px; padding: 4px 8px; border: 1px solid #ddd; border-radius: 4px;">
                     </label>
                     <button class="btn btn-sm btn-primary" onclick="refreshLogs()">
                         <span class="btn-spinner" style="display: none;"></span>
