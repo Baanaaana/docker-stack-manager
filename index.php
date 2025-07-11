@@ -472,6 +472,9 @@ try {
             padding: 20px;
             overflow-y: auto;
             flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
         }
 
         .logs-controls {
@@ -481,6 +484,7 @@ try {
             margin-bottom: 20px;
             padding-bottom: 15px;
             border-bottom: 1px solid #e0e0e0;
+            flex-shrink: 0;
         }
 
         .logs-controls label {
@@ -499,10 +503,11 @@ try {
             font-size: 13px;
             line-height: 1.5;
             overflow-x: auto;
-            max-height: 1000px;
             overflow-y: auto;
             white-space: pre-wrap;
             word-wrap: break-word;
+            flex: 1;
+            min-height: 0;
         }
 
         .btn-sm {
