@@ -633,6 +633,37 @@ try {
             }
         }
 
+        /* Floating GitHub Button */
+        .github-fab {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(45deg, #24292e, #333);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            font-size: 28px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .github-fab:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+            color: white;
+            text-decoration: none;
+        }
+
+        .github-fab:active {
+            transform: translateY(0);
+        }
+
         /* Toggle Switch Styles */
         .toggle-switch {
             position: relative;
@@ -832,6 +863,11 @@ try {
 </head>
 <body>
     <div class="toast-container" id="toastContainer"></div>
+    
+    <!-- Floating GitHub Button -->
+    <a href="https://github.com/Baanaaana/docker-stack-manager" target="_blank" class="github-fab" title="View on GitHub">
+        <i class="mdi mdi-github"></i>
+    </a>
     
     <!-- Logs Modal -->
     <div class="modal" id="logsModal">
