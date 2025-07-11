@@ -414,7 +414,7 @@ try {
             margin: 50px auto;
             border-radius: 12px;
             width: 90%;
-            max-width: 900px;
+            max-width: 80vw;
             max-height: 80vh;
             display: flex;
             flex-direction: column;
@@ -559,6 +559,50 @@ try {
             }
         }
 
+        /* Confirmation Modal Styles */
+        .confirm-modal {
+            max-width: 450px;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .confirm-icon {
+            font-size: 64px;
+            color: #e74c3c;
+            margin-bottom: 20px;
+        }
+
+        .confirm-title {
+            font-size: 24px;
+            color: #2c3e50;
+            margin: 0 0 15px 0;
+            font-weight: 500;
+        }
+
+        .confirm-message {
+            font-size: 16px;
+            color: #5a6c7d;
+            margin: 0 0 30px 0;
+            line-height: 1.5;
+        }
+
+        .confirm-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #7f8c8d;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
         .services-list {
             text-align: left;
             margin-top: 15px;
@@ -626,6 +670,21 @@ try {
                     </button>
                 </div>
                 <pre class="logs-content" id="logsContent">Loading logs...</pre>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Confirmation Modal -->
+    <div class="modal" id="confirmModal">
+        <div class="modal-content confirm-modal">
+            <div class="confirm-icon">
+                <i class="mdi mdi-alert-circle-outline"></i>
+            </div>
+            <h3 class="confirm-title">Confirm Action</h3>
+            <p class="confirm-message" id="confirmMessage"></p>
+            <div class="confirm-buttons">
+                <button class="btn btn-secondary" onclick="handleConfirmation(false)">Cancel</button>
+                <button class="btn btn-danger" id="confirmBtn" onclick="handleConfirmation(true)">Confirm</button>
             </div>
         </div>
     </div>
@@ -1090,14 +1149,16 @@ try {
         }
 
         async function stopStack(event) {
-            if (!confirm(`Are you sure you want to stop the stack "${CONFIG.stackName}"?`)) {
+            const confirmed = await showConfirmation(`Are you sure you want to stop the stack "${CONFIG.stackName}"?`);
+            if (!confirmed) {
                 return;
             }
             await performStackAction('stop', event);
         }
 
         async function restartStack(event) {
-            if (!confirm(`Are you sure you want to restart the stack "${CONFIG.stackName}"?`)) {
+            const confirmed = await showConfirmation(`Are you sure you want to restart the stack "${CONFIG.stackName}"?`);
+            if (!confirmed) {
                 return;
             }
             await performStackAction('stop', event);
@@ -1111,12 +1172,39 @@ try {
             });
         }
 
+        // Confirmation modal functionality
+        let confirmationResolver = null;
+
+        function showConfirmation(message, isDanger = true) {
+            return new Promise((resolve) => {
+                confirmationResolver = resolve;
+                const modal = document.getElementById('confirmModal');
+                const messageEl = document.getElementById('confirmMessage');
+                const confirmBtn = document.getElementById('confirmBtn');
+                
+                messageEl.textContent = message;
+                confirmBtn.className = isDanger ? 'btn btn-danger' : 'btn btn-primary';
+                modal.style.display = 'block';
+            });
+        }
+
+        function handleConfirmation(confirmed) {
+            const modal = document.getElementById('confirmModal');
+            modal.style.display = 'none';
+            
+            if (confirmationResolver) {
+                confirmationResolver(confirmed);
+                confirmationResolver = null;
+            }
+        }
+
         // Container logs functionality
         let currentContainerId = null;
         
         // Container restart functionality
         async function restartContainer(containerId, containerName) {
-            if (!confirm(`Are you sure you want to restart container "${containerName}"?`)) {
+            const confirmed = await showConfirmation(`Are you sure you want to restart container "${containerName}"?`);
+            if (!confirmed) {
                 return;
             }
             
@@ -1236,16 +1324,27 @@ try {
         
         // Close modal when clicking outside
         window.addEventListener('click', (event) => {
-            const modal = document.getElementById('logsModal');
-            if (event.target === modal) {
+            const logsModal = document.getElementById('logsModal');
+            const confirmModal = document.getElementById('confirmModal');
+            
+            if (event.target === logsModal) {
                 closeLogsModal();
+            } else if (event.target === confirmModal) {
+                handleConfirmation(false);
             }
         });
         
         // Close modal with Escape key
         window.addEventListener('keydown', (event) => {
             if (event.key === 'Escape') {
-                closeLogsModal();
+                const logsModal = document.getElementById('logsModal');
+                const confirmModal = document.getElementById('confirmModal');
+                
+                if (logsModal.style.display === 'block') {
+                    closeLogsModal();
+                } else if (confirmModal.style.display === 'block') {
+                    handleConfirmation(false);
+                }
             }
         });
     </script>
