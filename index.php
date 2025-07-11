@@ -129,7 +129,7 @@ try {
             border-radius: 20px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             padding: 30px;
-            max-width: 900px;
+            max-width: 600px;
             width: 100%;
             text-align: center;
         }
