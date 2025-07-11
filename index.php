@@ -1421,7 +1421,7 @@ try {
                                     <span class="status-indicator ${containerStatus === 'running' ? 'status-running' : 'status-stopped'}"></span>
                                     ${containerStatus}
                                 </span>
-                                <div style="display: flex; gap: 4px; justify-content: flex-end;">
+                                <div style="display: flex; gap: 8px; justify-content: flex-end;">
                                     <button class="btn btn-sm btn-restart" onclick="restartContainer('${containerId}', '${containerName}')" title="Restart container" ${containerStatus !== 'running' ? 'disabled' : ''}>
                                         <i class="mdi mdi-restart"></i>
                                     </button>
@@ -1527,7 +1527,7 @@ try {
                                 <span class="status-indicator ${containerStatus === 'running' ? 'status-running' : 'status-stopped'}"></span>
                                 ${containerStatus}
                             </span>
-                            <div style="display: flex; gap: 4px; justify-content: flex-end;">
+                            <div style="display: flex; gap: 8px; justify-content: flex-end;">
                                 <button class="btn btn-sm btn-restart" onclick="restartContainer('${containerId}', '${containerName}')" title="Restart container" ${containerStatus !== 'running' ? 'disabled' : ''}>
                                     <i class="mdi mdi-restart"></i>
                                 </button>
