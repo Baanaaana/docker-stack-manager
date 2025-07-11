@@ -1065,7 +1065,7 @@ try {
         </div>
     </div>
     
-    <div class="container">
+    <div class="container" id="mainContainer">
         <div class="docker-icon-container" onclick="location.reload()" style="cursor: pointer;" title="Refresh page">
             <i class="mdi mdi-docker docker-icon"></i>
             <i class="mdi mdi-reload reload-overlay"></i>
@@ -1341,7 +1341,7 @@ try {
             document.body.className = 'all-stacks';
             
             // Hide the main container
-            document.querySelector('.container').style.display = 'none';
+            document.getElementById('mainContainer').style.display = 'none';
             
             // Create or get the all-stacks container
             let allStacksContainer = document.getElementById('allStacksContainer');
@@ -1477,7 +1477,7 @@ try {
             document.body.className = 'single-stack';
             
             // Show the main container and hide all-stacks container
-            document.querySelector('.container').style.display = 'block';
+            document.getElementById('mainContainer').style.display = 'block';
             const allStacksContainer = document.getElementById('allStacksContainer');
             if (allStacksContainer) {
                 allStacksContainer.style.display = 'none';
@@ -1719,6 +1719,18 @@ try {
                 CONFIG.stackName = originalStackName;
             }
         }
+        
+        // Function to go back to ALL view
+        function goBackToAllView() {
+            if (CONFIG.stackName === 'ALL') {
+                document.body.className = 'all-stacks';
+                document.getElementById('mainContainer').style.display = 'none';
+                const allStacksContainer = document.getElementById('allStacksContainer');
+                if (allStacksContainer) {
+                    allStacksContainer.style.display = 'block';
+                }
+            }
+        }
 
         async function startStackAction(stackName, event) {
             const originalStackName = CONFIG.stackName;
@@ -1728,8 +1740,8 @@ try {
                 await performStackAction('start', event);
                 // Refresh the all stacks view
                 setTimeout(() => {
-                    CONFIG.stackName = 'ALL';
                     getStackStatus(null, false);
+                    goBackToAllView();
                 }, 3000);
             } finally {
                 CONFIG.stackName = originalStackName;
@@ -1749,8 +1761,8 @@ try {
                 await performStackAction('stop', event);
                 // Refresh the all stacks view
                 setTimeout(() => {
-                    CONFIG.stackName = 'ALL';
                     getStackStatus(null, false);
+                    goBackToAllView();
                 }, 3000);
             } finally {
                 CONFIG.stackName = originalStackName;
@@ -1772,8 +1784,8 @@ try {
                     await performStackAction('start', event);
                     // Refresh the all stacks view
                     setTimeout(() => {
-                        CONFIG.stackName = 'ALL';
                         getStackStatus(null, false);
+                        goBackToAllView();
                     }, 3000);
                 }, 2000);
             } finally {
@@ -1814,15 +1826,31 @@ try {
             setTimeout(() => startRefreshCountdown(), 1000);
         }
 
+        // Initialize page based on stack configuration
+        function initializePage() {
+            if (CONFIG.hasError) {
+                return;
+            }
+            
+            // Set initial layout based on stack name
+            if (CONFIG.stackName === 'ALL') {
+                document.body.className = 'all-stacks';
+                document.getElementById('mainContainer').style.display = 'none';
+            } else {
+                document.body.className = 'single-stack';
+            }
+            
+            // Load stack status
+            setTimeout(() => {
+                getStackStatus(null, false);
+                // Start the countdown after initial load
+                setTimeout(() => startRefreshCountdown(), 1000);
+            }, 100);
+        }
+        
         // Auto-load stack status if configuration is valid
         if (!CONFIG.hasError) {
-            window.addEventListener('load', () => {
-                setTimeout(() => {
-                    getStackStatus(null, false);
-                    // Start the countdown after initial load
-                    setTimeout(() => startRefreshCountdown(), 1000);
-                }, 1000);
-            });
+            window.addEventListener('load', initializePage);
         }
 
         // Confirmation modal functionality
