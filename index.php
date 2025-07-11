@@ -872,7 +872,7 @@ try {
         .service-item {
             display: grid;
             grid-template-columns: 1fr auto auto;
-            gap: 2px;
+            gap: 12px;
             align-items: center;
             padding: 10px 0;
             border-bottom: 1px solid #e0e0e0;
@@ -885,13 +885,13 @@ try {
         @media (max-width: 600px) {
             .service-item {
                 grid-template-columns: 1fr auto auto;
-                gap: 2px;
+                gap: 8px;
                 padding: 8px 0;
             }
             
             .service-item.with-actions {
                 grid-template-columns: 1fr auto auto;
-                gap: 2px;
+                gap: 8px;
             }
             
             .service-item span {
@@ -1421,7 +1421,7 @@ try {
                                     <span class="status-indicator ${containerStatus === 'running' ? 'status-running' : 'status-stopped'}"></span>
                                     ${containerStatus}
                                 </span>
-                                <div style="display: flex; gap: 0px; justify-content: flex-end;">
+                                <div style="display: flex; gap: 4px; justify-content: flex-end;">
                                     <button class="btn btn-sm btn-restart" onclick="restartContainer('${containerId}', '${containerName}')" title="Restart container" ${containerStatus !== 'running' ? 'disabled' : ''}>
                                         <i class="mdi mdi-restart"></i>
                                     </button>
@@ -1527,7 +1527,7 @@ try {
                                 <span class="status-indicator ${containerStatus === 'running' ? 'status-running' : 'status-stopped'}"></span>
                                 ${containerStatus}
                             </span>
-                            <div style="display: flex; gap: 0px; justify-content: flex-end;">
+                            <div style="display: flex; gap: 4px; justify-content: flex-end;">
                                 <button class="btn btn-sm btn-restart" onclick="restartContainer('${containerId}', '${containerName}')" title="Restart container" ${containerStatus !== 'running' ? 'disabled' : ''}>
                                     <i class="mdi mdi-restart"></i>
                                 </button>
