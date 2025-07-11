@@ -1254,20 +1254,41 @@ try {
             for (const stack of stacks) {
                 // Create stack header
                 const stackHeaderDiv = document.createElement('div');
-                stackHeaderDiv.style.cssText = 'margin-top: 20px; margin-bottom: 10px; padding: 10px; background-color: #f0f0f0; border-radius: 8px;';
+                stackHeaderDiv.style.cssText = 'margin-top: 20px; margin-bottom: 10px; padding: 15px; background-color: #f0f0f0; border-radius: 8px;';
                 
                 const stackType = stack.Type === 1 ? 'Docker Swarm' : 'Docker Compose';
                 const stackStatus = stack.Status === 1 ? 'Running' : 'Stopped';
                 const stackStatusClass = stack.Status === 1 ? 'status-running' : 'status-stopped';
                 
+                const isRunning = stack.Status === 1;
+                
                 stackHeaderDiv.innerHTML = `
-                    <h5 style="margin: 0; color: #2c3e50; font-size: 1.2em;">
-                        ${stack.Name} 
-                        <span style="font-weight: normal; font-size: 0.9em; color: #5a6c7d;">
-                            (${stackType}) - 
-                            <span class="status-indicator ${stackStatusClass}"></span>${stackStatus}
-                        </span>
-                    </h5>
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                        <h5 style="margin: 0; color: #2c3e50; font-size: 1.2em; flex: 1;">
+                            ${stack.Name} 
+                            <span style="font-weight: normal; font-size: 0.9em; color: #5a6c7d;">
+                                (${stackType}) - 
+                                <span class="status-indicator ${stackStatusClass}"></span>${stackStatus}
+                            </span>
+                        </h5>
+                        <div style="display: flex; gap: 10px; flex-shrink: 0;">
+                            ${isRunning ? `
+                                <button class="btn btn-sm btn-danger" onclick="stopStackAction('${stack.Name}', event)" title="Stop Stack">
+                                    <span class="btn-spinner" style="display: none;"></span>
+                                    <span class="btn-text">Stop</span>
+                                </button>
+                                <button class="btn btn-sm btn-warning" onclick="restartStackAction('${stack.Name}', event)" title="Restart Stack">
+                                    <span class="btn-spinner" style="display: none;"></span>
+                                    <span class="btn-text">Restart</span>
+                                </button>
+                            ` : `
+                                <button class="btn btn-sm btn-success" onclick="startStackAction('${stack.Name}', event)" title="Start Stack">
+                                    <span class="btn-spinner" style="display: none;"></span>
+                                    <span class="btn-text">Start</span>
+                                </button>
+                            `}
+                        </div>
+                    </div>
                 `;
                 servicesList.appendChild(stackHeaderDiv);
                 
