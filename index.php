@@ -389,6 +389,153 @@ try {
             }
         }
 
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            position: relative;
+            background-color: #fff;
+            margin: 50px auto;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 900px;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-header {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 1.5em;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: #95a5a6;
+            cursor: pointer;
+            padding: 0;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background-color: #f0f0f0;
+            color: #2c3e50;
+        }
+
+        .modal-body {
+            padding: 20px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .logs-controls {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .logs-controls label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #5a6c7d;
+        }
+
+        .logs-content {
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 13px;
+            line-height: 1.5;
+            overflow-x: auto;
+            max-height: 500px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 14px;
+            min-width: auto;
+        }
+
+        .btn-logs {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            padding: 6px 12px;
+            font-size: 13px;
+            border-radius: 20px;
+        }
+
+        .btn-logs:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+        }
+
+        @media (max-width: 600px) {
+            .modal-content {
+                margin: 20px;
+                width: calc(100% - 40px);
+                max-height: calc(100vh - 40px);
+            }
+            
+            .logs-controls {
+                flex-wrap: wrap;
+            }
+        }
+
         .services-list {
             text-align: left;
             margin-top: 15px;
@@ -396,7 +543,7 @@ try {
 
         .service-item {
             display: grid;
-            grid-template-columns: 1fr auto auto;
+            grid-template-columns: 1fr auto auto auto;
             gap: 15px;
             align-items: center;
             padding: 8px 0;
@@ -434,6 +581,31 @@ try {
 </head>
 <body>
     <div class="toast-container" id="toastContainer"></div>
+    
+    <!-- Logs Modal -->
+    <div class="modal" id="logsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Container Logs: <span id="containerName"></span></h2>
+                <button class="modal-close" onclick="closeLogsModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="logs-controls">
+                    <label>
+                        <input type="checkbox" id="autoScroll" checked> Auto-scroll
+                    </label>
+                    <label>
+                        Lines: <input type="number" id="logLines" value="100" min="10" max="1000" style="width: 80px;">
+                    </label>
+                    <button class="btn btn-sm btn-primary" onclick="refreshLogs()">
+                        <span class="btn-spinner" style="display: none;"></span>
+                        <span class="btn-text">Refresh</span>
+                    </button>
+                </div>
+                <pre class="logs-content" id="logsContent">Loading logs...</pre>
+            </div>
+        </div>
+    </div>
     
     <div class="container">
         <i class="mdi mdi-docker docker-icon"></i>
@@ -753,12 +925,16 @@ try {
                         // Docker Compose container
                         const containerName = service.Names ? service.Names[0].replace('/', '') : service.Id.substring(0, 12);
                         const containerStatus = service.State || 'unknown';
+                        const containerId = service.Id;
                         serviceDiv.innerHTML = `
                             <span>${containerName}</span>
                             <span class="service-status">
                                 <span class="status-indicator ${containerStatus === 'running' ? 'status-running' : 'status-stopped'}"></span>
                             </span>
                             <span>${containerStatus}</span>
+                            <button class="btn btn-sm btn-logs" onclick="viewContainerLogs('${containerId}', '${containerName}')" ${containerStatus !== 'running' ? 'disabled' : ''}>
+                                <i class="mdi mdi-text-box-outline"></i> Logs
+                            </button>
                         `;
                     }
                     servicesList.appendChild(serviceDiv);
@@ -902,6 +1078,108 @@ try {
                 setTimeout(() => getStackStatus(), 1000);
             });
         }
+
+        // Container logs functionality
+        let currentContainerId = null;
+        
+        async function viewContainerLogs(containerId, containerName) {
+            currentContainerId = containerId;
+            const modal = document.getElementById('logsModal');
+            const containerNameSpan = document.getElementById('containerName');
+            const logsContent = document.getElementById('logsContent');
+            
+            containerNameSpan.textContent = containerName;
+            modal.style.display = 'block';
+            logsContent.textContent = 'Loading logs...';
+            
+            await fetchContainerLogs(containerId);
+        }
+        
+        async function fetchContainerLogs(containerId) {
+            const logsContent = document.getElementById('logsContent');
+            const logLines = document.getElementById('logLines').value;
+            
+            try {
+                const response = await fetch(`${CONFIG.portainerUrl}/api/endpoints/${endpointId}/docker/containers/${containerId}/logs?stdout=true&stderr=true&tail=${logLines}&timestamps=true`, {
+                    headers: {
+                        'X-API-Key': CONFIG.accessToken
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch logs: ${response.status}`);
+                }
+                
+                // Docker logs API returns data in a special format, we need to parse it
+                const text = await response.text();
+                
+                // Clean and format the logs
+                const formattedLogs = formatDockerLogs(text);
+                logsContent.textContent = formattedLogs || 'No logs available';
+                
+                // Auto-scroll if enabled
+                if (document.getElementById('autoScroll').checked) {
+                    logsContent.scrollTop = logsContent.scrollHeight;
+                }
+                
+            } catch (error) {
+                logsContent.textContent = `Error fetching logs: ${error.message}`;
+                showToast(`Failed to fetch container logs: ${error.message}`, 'error');
+            }
+        }
+        
+        function formatDockerLogs(rawLogs) {
+            if (!rawLogs) return 'No logs available';
+            
+            // Docker logs come with 8-byte headers that we need to strip
+            // This is a simplified version - in production you'd want more robust parsing
+            const lines = rawLogs.split('\n');
+            const formattedLines = [];
+            
+            lines.forEach(line => {
+                if (line.trim()) {
+                    // Try to extract timestamp and message
+                    // Docker logs format: [HEADER]TIMESTAMP MESSAGE
+                    // We'll do a simple cleanup here
+                    const cleanLine = line.replace(/[\x00-\x1F\x7F-\x9F]/g, '').trim();
+                    if (cleanLine) {
+                        formattedLines.push(cleanLine);
+                    }
+                }
+            });
+            
+            return formattedLines.join('\n');
+        }
+        
+        async function refreshLogs() {
+            if (currentContainerId) {
+                const button = event.target.closest('button');
+                showLoading(true, button);
+                await fetchContainerLogs(currentContainerId);
+                showLoading(false, button);
+            }
+        }
+        
+        function closeLogsModal() {
+            const modal = document.getElementById('logsModal');
+            modal.style.display = 'none';
+            currentContainerId = null;
+        }
+        
+        // Close modal when clicking outside
+        window.addEventListener('click', (event) => {
+            const modal = document.getElementById('logsModal');
+            if (event.target === modal) {
+                closeLogsModal();
+            }
+        });
+        
+        // Close modal with Escape key
+        window.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape') {
+                closeLogsModal();
+            }
+        });
     </script>
 </body>
 </html>
