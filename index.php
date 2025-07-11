@@ -1053,7 +1053,7 @@ try {
             }
         }
 
-        async function getStackStatus(event) {
+        async function getStackStatus(event, showToast = true) {
             const button = event ? event.target.closest('button') : document.querySelector('.btn-primary');
             showLoading(true, button);
 
@@ -1079,7 +1079,9 @@ try {
                 if (CONFIG.stackName === 'ALL') {
                     // Show all stacks
                     await displayAllStacks(stacks);
-                    showAlert('All stacks status updated successfully');
+                    if (showToast) {
+                        showAlert('All stacks status updated successfully');
+                    }
                 } else {
                     // Show single stack
                     const stack = stacks.find(s => s.Name === CONFIG.stackName);
@@ -1124,7 +1126,9 @@ try {
                     }
 
                     displayStackInfo(stack, services);
-                    showAlert('Stack status updated successfully');
+                    if (showToast) {
+                        showAlert('Stack status updated successfully');
+                    }
                 }
 
             } catch (error) {
@@ -1515,9 +1519,9 @@ try {
         if (!CONFIG.hasError) {
             window.addEventListener('load', () => {
                 setTimeout(() => getStackStatus(), 1000);
-                // Auto-refresh every 10 seconds
+                // Auto-refresh every 10 seconds (silent, no toast)
                 setInterval(() => {
-                    getStackStatus();
+                    getStackStatus(null, false);
                 }, 10000);
             });
         }
