@@ -901,6 +901,7 @@ try {
         <div class="stack-info" id="stackInfo" style="display: none;">
             <p style="margin-bottom: 15px;"><strong>Stack:</strong> <span id="stackNameDisplay"></span></p>
             <p style="margin-bottom: 15px;"><strong>Status:</strong> <span id="stackStatus"></span></p>
+            <p style="margin-bottom: 15px;"><strong>Auto-refresh:</strong> <span id="refreshCountdown">30s</span></p>
             
             <div class="services-list" id="servicesList">
                 <h4>Services:</h4>
@@ -1056,6 +1057,11 @@ try {
         async function getStackStatus(event, showToast = true) {
             const button = event ? event.target.closest('button') : document.querySelector('.btn-primary');
             showLoading(true, button);
+
+            // Reset countdown if this is a manual refresh
+            if (event) {
+                resetRefreshCountdown();
+            }
 
             try {
                 const isValid = await validateConfig();
@@ -1515,14 +1521,47 @@ try {
             setTimeout(() => performStackAction('start', event), 2000);
         }
 
+        // Auto-refresh functionality
+        let refreshTimer = null;
+        let countdownTimer = null;
+        let countdownSeconds = 30;
+
+        function startRefreshCountdown() {
+            const countdownEl = document.getElementById('refreshCountdown');
+            countdownSeconds = 30;
+            
+            // Update countdown every second
+            countdownTimer = setInterval(() => {
+                countdownSeconds--;
+                if (countdownEl) {
+                    countdownEl.textContent = `${countdownSeconds}s`;
+                }
+                
+                if (countdownSeconds <= 0) {
+                    clearInterval(countdownTimer);
+                    getStackStatus(null, false);
+                    // Restart the countdown
+                    setTimeout(() => startRefreshCountdown(), 1000);
+                }
+            }, 1000);
+        }
+
+        function resetRefreshCountdown() {
+            // Reset countdown when manual refresh is triggered
+            if (countdownTimer) {
+                clearInterval(countdownTimer);
+            }
+            setTimeout(() => startRefreshCountdown(), 1000);
+        }
+
         // Auto-load stack status if configuration is valid
         if (!CONFIG.hasError) {
             window.addEventListener('load', () => {
-                setTimeout(() => getStackStatus(null, false), 1000);
-                // Auto-refresh every 10 seconds (silent, no toast)
-                setInterval(() => {
+                setTimeout(() => {
                     getStackStatus(null, false);
-                }, 10000);
+                    // Start the countdown after initial load
+                    setTimeout(() => startRefreshCountdown(), 1000);
+                }, 1000);
             });
         }
 
