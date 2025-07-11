@@ -871,27 +871,27 @@ try {
 
         .service-item {
             display: grid;
-            grid-template-columns: 1fr auto 120px auto;
-            gap: 8px;
+            grid-template-columns: 1fr auto auto;
+            gap: 2px;
             align-items: center;
             padding: 10px 0;
             border-bottom: 1px solid #e0e0e0;
         }
         
         .service-item.with-actions {
-            grid-template-columns: 1fr auto 120px 100px;
+            grid-template-columns: 1fr auto auto;
         }
         
         @media (max-width: 600px) {
             .service-item {
-                grid-template-columns: 1fr auto auto auto;
-                gap: 4px;
+                grid-template-columns: 1fr auto auto;
+                gap: 2px;
                 padding: 8px 0;
             }
             
             .service-item.with-actions {
-                grid-template-columns: 1fr auto 80px 70px;
-                gap: 4px;
+                grid-template-columns: 1fr auto auto;
+                gap: 2px;
             }
             
             .service-item span {
@@ -1419,9 +1419,9 @@ try {
                                 <span>${containerName}</span>
                                 <span class="service-status">
                                     <span class="status-indicator ${containerStatus === 'running' ? 'status-running' : 'status-stopped'}"></span>
+                                    ${containerStatus}
                                 </span>
-                                <span>${containerStatus}</span>
-                                <div style="display: flex; gap: 5px; justify-content: flex-end;">
+                                <div style="display: flex; gap: 0px; justify-content: flex-end;">
                                     <button class="btn btn-sm btn-restart" onclick="restartContainer('${containerId}', '${containerName}')" title="Restart container" ${containerStatus !== 'running' ? 'disabled' : ''}>
                                         <i class="mdi mdi-restart"></i>
                                     </button>
@@ -1525,9 +1525,9 @@ try {
                             <span>${containerName}</span>
                             <span class="service-status">
                                 <span class="status-indicator ${containerStatus === 'running' ? 'status-running' : 'status-stopped'}"></span>
+                                ${containerStatus}
                             </span>
-                            <span>${containerStatus}</span>
-                            <div style="display: flex; gap: 5px; justify-content: flex-end;">
+                            <div style="display: flex; gap: 0px; justify-content: flex-end;">
                                 <button class="btn btn-sm btn-restart" onclick="restartContainer('${containerId}', '${containerName}')" title="Restart container" ${containerStatus !== 'running' ? 'disabled' : ''}>
                                     <i class="mdi mdi-restart"></i>
                                 </button>
