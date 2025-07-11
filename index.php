@@ -499,7 +499,7 @@ try {
             font-size: 13px;
             line-height: 1.5;
             overflow-x: auto;
-            max-height: 80vh;
+            max-height: 1000px;
             overflow-y: auto;
             white-space: pre-wrap;
             word-wrap: break-word;
