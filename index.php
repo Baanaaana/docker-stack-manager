@@ -233,43 +233,160 @@ try {
             transform: none;
         }
 
-        .loading {
-            display: none;
-            margin: 20px 0;
+        .btn-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
         }
 
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto;
+        .btn.loading {
+            pointer-events: none;
+            position: relative;
+        }
+
+        .btn.loading .btn-text {
+            visibility: hidden;
+        }
+
+        .btn.loading .btn-spinner {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            margin: 0;
+            display: inline-block !important;
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
         }
 
-        .alert {
-            padding: 15px;
-            margin: 20px 0;
-            border-radius: 8px;
-            display: none;
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
         }
 
-        .alert-success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
+        .toast {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            padding: 16px 24px;
+            min-width: 300px;
+            max-width: 500px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+            overflow: hidden;
+            pointer-events: auto;
+            animation: slideIn 0.3s ease-out;
         }
 
-        .alert-error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        .toast.removing {
+            animation: slideOut 0.3s ease-in;
+        }
+
+        .toast-success {
+            border-left: 4px solid #27ae60;
+        }
+
+        .toast-error {
+            border-left: 4px solid #e74c3c;
+        }
+
+        .toast-icon {
+            font-size: 24px;
+            flex-shrink: 0;
+        }
+
+        .toast-success .toast-icon {
+            color: #27ae60;
+        }
+
+        .toast-error .toast-icon {
+            color: #e74c3c;
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: #2c3e50;
+        }
+
+        .toast-message {
+            color: #5a6c7d;
+            font-size: 14px;
+        }
+
+        .toast-close {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background: none;
+            border: none;
+            color: #95a5a6;
+            cursor: pointer;
+            font-size: 20px;
+            padding: 4px;
+            line-height: 1;
+            transition: color 0.2s;
+        }
+
+        .toast-close:hover {
+            color: #2c3e50;
+        }
+
+        @media (max-width: 600px) {
+            .toast-container {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+            }
+            
+            .toast {
+                min-width: auto;
+                max-width: 100%;
+            }
         }
 
         .services-list {
@@ -316,6 +433,8 @@ try {
     </style>
 </head>
 <body>
+    <div class="toast-container" id="toastContainer"></div>
+    
     <div class="container">
         <i class="mdi mdi-docker docker-icon"></i>
         <h1>Docker Stack Manager</h1>
@@ -330,14 +449,6 @@ try {
         </div>
         <?php endif; ?>
 
-        <div class="loading">
-            <div class="spinner"></div>
-            <p>Loading...</p>
-        </div>
-
-        <div class="alert alert-success" id="successAlert"></div>
-        <div class="alert alert-error" id="errorAlert"></div>
-
         <div class="stack-info" id="stackInfo" style="display: none;">
             <p style="margin-bottom: 15px;"><strong>Stack:</strong> <span id="stackNameDisplay"></span></p>
             <p style="margin-bottom: 15px;"><strong>Status:</strong> <span id="stackStatus"></span></p>
@@ -348,10 +459,22 @@ try {
         </div>
 
         <div class="button-group">
-            <button class="btn btn-primary" onclick="getStackStatus()" <?php echo isset($error) ? 'disabled' : ''; ?>>Status</button>
-            <button class="btn btn-success" id="startBtn" onclick="startStack()" style="display: none;" <?php echo isset($error) ? 'disabled' : ''; ?>>Start</button>
-            <button class="btn btn-danger" id="stopBtn" onclick="stopStack()" style="display: none;" <?php echo isset($error) ? 'disabled' : ''; ?>>Stop</button>
-            <button class="btn btn-warning" id="restartBtn" onclick="restartStack()" style="display: none;" <?php echo isset($error) ? 'disabled' : ''; ?>>Restart</button>
+            <button class="btn btn-primary" onclick="getStackStatus(event)" <?php echo isset($error) ? 'disabled' : ''; ?>>
+                <span class="btn-spinner" style="display: none;"></span>
+                <span class="btn-text">Status</span>
+            </button>
+            <button class="btn btn-success" id="startBtn" onclick="startStack(event)" style="display: none;" <?php echo isset($error) ? 'disabled' : ''; ?>>
+                <span class="btn-spinner" style="display: none;"></span>
+                <span class="btn-text">Start</span>
+            </button>
+            <button class="btn btn-danger" id="stopBtn" onclick="stopStack(event)" style="display: none;" <?php echo isset($error) ? 'disabled' : ''; ?>>
+                <span class="btn-spinner" style="display: none;"></span>
+                <span class="btn-text">Stop</span>
+            </button>
+            <button class="btn btn-warning" id="restartBtn" onclick="restartStack(event)" style="display: none;" <?php echo isset($error) ? 'disabled' : ''; ?>>
+                <span class="btn-spinner" style="display: none;"></span>
+                <span class="btn-text">Restart</span>
+            </button>
         </div>
     </div>
 
@@ -365,23 +488,92 @@ try {
         };
 
         let endpointId = '';
+        let activeButton = null;
 
-        function showLoading(show) {
-            document.querySelector('.loading').style.display = show ? 'block' : 'none';
+        function showLoading(show, button = null) {
+            const allButtons = document.querySelectorAll('.btn');
+            
+            if (button) {
+                if (show) {
+                    activeButton = button;
+                    button.classList.add('loading');
+                    button.querySelector('.btn-spinner').style.display = 'inline-block';
+                    
+                    // Disable all buttons
+                    allButtons.forEach(btn => {
+                        btn.disabled = true;
+                    });
+                } else {
+                    button.classList.remove('loading');
+                    button.querySelector('.btn-spinner').style.display = 'none';
+                    
+                    // Re-enable all buttons (except those with error state)
+                    if (!CONFIG.hasError) {
+                        allButtons.forEach(btn => {
+                            btn.disabled = false;
+                        });
+                    }
+                    
+                    activeButton = null;
+                }
+            } else if (activeButton && !show) {
+                // Hide loading on the active button if no specific button provided
+                activeButton.classList.remove('loading');
+                activeButton.querySelector('.btn-spinner').style.display = 'none';
+                
+                // Re-enable all buttons (except those with error state)
+                if (!CONFIG.hasError) {
+                    allButtons.forEach(btn => {
+                        btn.disabled = false;
+                    });
+                }
+                
+                activeButton = null;
+            }
         }
 
         function showAlert(message, type = 'success') {
-            const alertElement = document.getElementById(type === 'success' ? 'successAlert' : 'errorAlert');
-            alertElement.textContent = message;
-            alertElement.style.display = 'block';
+            showToast(message, type);
+        }
+
+        function showToast(message, type = 'success') {
+            const toastContainer = document.getElementById('toastContainer');
             
-            // Hide other alert
-            const otherAlert = document.getElementById(type === 'success' ? 'errorAlert' : 'successAlert');
-            otherAlert.style.display = 'none';
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            
+            // Create toast content
+            const icon = type === 'success' ? 'mdi-check-circle' : 'mdi-alert-circle';
+            const title = type === 'success' ? 'Success' : 'Error';
+            
+            toast.innerHTML = `
+                <i class="mdi ${icon} toast-icon"></i>
+                <div class="toast-content">
+                    <div class="toast-title">${title}</div>
+                    <div class="toast-message">${message}</div>
+                </div>
+                <button class="toast-close" onclick="removeToast(this)">&times;</button>
+            `;
+            
+            // Add to container
+            toastContainer.appendChild(toast);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    removeToast(toast.querySelector('.toast-close'));
+                }
+            }, 5000);
+        }
+
+        function removeToast(closeBtn) {
+            const toast = closeBtn.closest('.toast');
+            toast.classList.add('removing');
             
             setTimeout(() => {
-                alertElement.style.display = 'none';
-            }, 5000);
+                toast.remove();
+            }, 300);
         }
 
         async function validateConfig() {
@@ -412,8 +604,9 @@ try {
             }
         }
 
-        async function getStackStatus() {
-            showLoading(true);
+        async function getStackStatus(event) {
+            const button = event ? event.target.closest('button') : document.querySelector('.btn-primary');
+            showLoading(true, button);
 
             try {
                 const isValid = await validateConfig();
@@ -577,8 +770,9 @@ try {
             }
         }
 
-        async function performStackAction(action) {
-            showLoading(true);
+        async function performStackAction(action, event) {
+            const button = event ? event.target.closest('button') : null;
+            showLoading(true, button);
 
             try {
                 const isValid = await validateConfig();
@@ -689,17 +883,17 @@ try {
             }
         }
 
-        async function startStack() {
-            await performStackAction('start');
+        async function startStack(event) {
+            await performStackAction('start', event);
         }
 
-        async function stopStack() {
-            await performStackAction('stop');
+        async function stopStack(event) {
+            await performStackAction('stop', event);
         }
 
-        async function restartStack() {
-            await performStackAction('stop');
-            setTimeout(() => performStackAction('start'), 2000);
+        async function restartStack(event) {
+            await performStackAction('stop', event);
+            setTimeout(() => performStackAction('start', event), 2000);
         }
 
         // Auto-load stack status if configuration is valid
