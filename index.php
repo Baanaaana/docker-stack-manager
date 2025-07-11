@@ -664,6 +664,9 @@ try {
             <div class="modal-body">
                 <div class="logs-controls">
                     <label>
+                        <input type="checkbox" id="streamLogs" onchange="toggleStreaming()"> Stream logs
+                    </label>
+                    <label>
                         <input type="checkbox" id="autoScroll" checked> Auto-scroll
                     </label>
                     <label>
@@ -1206,6 +1209,8 @@ try {
 
         // Container logs functionality
         let currentContainerId = null;
+        let streamController = null;
+        let isStreaming = false;
         
         // Container restart functionality
         async function restartContainer(containerId, containerName) {
@@ -1260,33 +1265,133 @@ try {
         async function fetchContainerLogs(containerId) {
             const logsContent = document.getElementById('logsContent');
             const logLines = document.getElementById('logLines').value;
+            const streamCheckbox = document.getElementById('streamLogs');
+            
+            if (streamCheckbox.checked && !isStreaming) {
+                // Start streaming logs
+                startStreamingLogs(containerId);
+            } else if (!streamCheckbox.checked) {
+                // Fetch logs once
+                try {
+                    const response = await fetch(`${CONFIG.portainerUrl}/api/endpoints/${endpointId}/docker/containers/${containerId}/logs?stdout=true&stderr=true&tail=${logLines}&timestamps=true`, {
+                        headers: {
+                            'X-API-Key': CONFIG.accessToken
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`Failed to fetch logs: ${response.status}`);
+                    }
+                    
+                    // Docker logs API returns data in a special format, we need to parse it
+                    const text = await response.text();
+                    
+                    // Clean and format the logs
+                    const formattedLogs = formatDockerLogs(text);
+                    logsContent.textContent = formattedLogs || 'No logs available';
+                    
+                    // Auto-scroll if enabled
+                    if (document.getElementById('autoScroll').checked) {
+                        logsContent.scrollTop = logsContent.scrollHeight;
+                    }
+                    
+                } catch (error) {
+                    logsContent.textContent = `Error fetching logs: ${error.message}`;
+                    showToast(`Failed to fetch container logs: ${error.message}`, 'error');
+                }
+            }
+        }
+
+        async function startStreamingLogs(containerId) {
+            if (isStreaming) return;
+            
+            isStreaming = true;
+            const logsContent = document.getElementById('logsContent');
+            const logLines = document.getElementById('logLines').value;
+            
+            // Clear existing logs when starting stream
+            logsContent.textContent = 'Starting log stream...\n';
             
             try {
-                const response = await fetch(`${CONFIG.portainerUrl}/api/endpoints/${endpointId}/docker/containers/${containerId}/logs?stdout=true&stderr=true&tail=${logLines}&timestamps=true`, {
+                // Create an AbortController for cancelling the stream
+                streamController = new AbortController();
+                
+                const response = await fetch(`${CONFIG.portainerUrl}/api/endpoints/${endpointId}/docker/containers/${containerId}/logs?follow=true&stdout=true&stderr=true&tail=${logLines}&timestamps=true`, {
                     headers: {
                         'X-API-Key': CONFIG.accessToken
-                    }
+                    },
+                    signal: streamController.signal
                 });
                 
                 if (!response.ok) {
-                    throw new Error(`Failed to fetch logs: ${response.status}`);
+                    throw new Error(`Failed to start log stream: ${response.status}`);
                 }
                 
-                // Docker logs API returns data in a special format, we need to parse it
-                const text = await response.text();
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
                 
-                // Clean and format the logs
-                const formattedLogs = formatDockerLogs(text);
-                logsContent.textContent = formattedLogs || 'No logs available';
-                
-                // Auto-scroll if enabled
-                if (document.getElementById('autoScroll').checked) {
-                    logsContent.scrollTop = logsContent.scrollHeight;
+                while (true) {
+                    const { done, value } = await reader.read();
+                    
+                    if (done) break;
+                    
+                    buffer += decoder.decode(value, { stream: true });
+                    
+                    // Process complete lines
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop() || ''; // Keep incomplete line in buffer
+                    
+                    for (const line of lines) {
+                        if (line.trim()) {
+                            const formattedLine = formatDockerLogs(line);
+                            if (formattedLine) {
+                                logsContent.textContent += formattedLine + '\n';
+                                
+                                // Auto-scroll if enabled
+                                if (document.getElementById('autoScroll').checked) {
+                                    logsContent.scrollTop = logsContent.scrollHeight;
+                                }
+                                
+                                // Limit display to prevent memory issues
+                                const maxLines = 1000;
+                                const currentLines = logsContent.textContent.split('\n');
+                                if (currentLines.length > maxLines) {
+                                    logsContent.textContent = currentLines.slice(-maxLines).join('\n');
+                                }
+                            }
+                        }
+                    }
                 }
                 
             } catch (error) {
-                logsContent.textContent = `Error fetching logs: ${error.message}`;
-                showToast(`Failed to fetch container logs: ${error.message}`, 'error');
+                if (error.name !== 'AbortError') {
+                    logsContent.textContent += `\nError streaming logs: ${error.message}`;
+                    showToast(`Failed to stream logs: ${error.message}`, 'error');
+                }
+            } finally {
+                isStreaming = false;
+                document.getElementById('streamLogs').checked = false;
+            }
+        }
+
+        function stopStreamingLogs() {
+            if (streamController) {
+                streamController.abort();
+                streamController = null;
+            }
+            isStreaming = false;
+        }
+
+        function toggleStreaming() {
+            const streamCheckbox = document.getElementById('streamLogs');
+            
+            if (streamCheckbox.checked) {
+                if (currentContainerId) {
+                    startStreamingLogs(currentContainerId);
+                }
+            } else {
+                stopStreamingLogs();
             }
         }
         
@@ -1325,6 +1430,13 @@ try {
         function closeLogsModal() {
             const modal = document.getElementById('logsModal');
             modal.style.display = 'none';
+            
+            // Stop streaming if active
+            stopStreamingLogs();
+            
+            // Reset checkbox state
+            document.getElementById('streamLogs').checked = false;
+            
             currentContainerId = null;
         }
         
