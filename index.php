@@ -524,6 +524,19 @@ try {
             box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
         }
 
+        .btn-restart {
+            background: linear-gradient(45deg, #f39c12, #e67e22);
+            color: white;
+            padding: 6px 12px;
+            font-size: 13px;
+            border-radius: 20px;
+        }
+
+        .btn-restart:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(243, 156, 18, 0.3);
+        }
+
         @media (max-width: 600px) {
             .modal-content {
                 margin: 20px;
@@ -543,7 +556,7 @@ try {
 
         .service-item {
             display: grid;
-            grid-template-columns: 1fr auto auto auto;
+            grid-template-columns: 1fr auto auto auto auto;
             gap: 15px;
             align-items: center;
             padding: 8px 0;
@@ -932,6 +945,9 @@ try {
                                 <span class="status-indicator ${containerStatus === 'running' ? 'status-running' : 'status-stopped'}"></span>
                             </span>
                             <span>${containerStatus}</span>
+                            <button class="btn btn-sm btn-restart" onclick="restartContainer('${containerId}', '${containerName}')" ${containerStatus !== 'running' ? 'disabled' : ''}>
+                                <i class="mdi mdi-restart"></i> Restart
+                            </button>
                             <button class="btn btn-sm btn-logs" onclick="viewContainerLogs('${containerId}', '${containerName}')" ${containerStatus !== 'running' ? 'disabled' : ''}>
                                 <i class="mdi mdi-text-box-outline"></i> Logs
                             </button>
@@ -1081,6 +1097,42 @@ try {
 
         // Container logs functionality
         let currentContainerId = null;
+        
+        // Container restart functionality
+        async function restartContainer(containerId, containerName) {
+            if (!confirm(`Are you sure you want to restart container "${containerName}"?`)) {
+                return;
+            }
+            
+            const button = event.target.closest('button');
+            showLoading(true, button);
+            
+            try {
+                // Restart the container using Docker API
+                const response = await fetch(`${CONFIG.portainerUrl}/api/endpoints/${endpointId}/docker/containers/${containerId}/restart`, {
+                    method: 'POST',
+                    headers: {
+                        'X-API-Key': CONFIG.accessToken
+                    }
+                });
+                
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`Failed to restart container: ${response.status} - ${errorText}`);
+                }
+                
+                showToast(`Container "${containerName}" restarted successfully`, 'success');
+                
+                // Refresh the stack status after a short delay
+                setTimeout(() => getStackStatus(), 2000);
+                
+            } catch (error) {
+                console.error('Error restarting container:', error);
+                showToast(`Failed to restart container: ${error.message}`, 'error');
+            } finally {
+                showLoading(false, button);
+            }
+        }
         
         async function viewContainerLogs(containerId, containerName) {
             currentContainerId = containerId;
