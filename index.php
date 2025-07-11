@@ -986,7 +986,7 @@ try {
 
         .service-item {
             display: grid;
-            grid-template-columns: 1fr auto auto auto auto;
+            grid-template-columns: 1fr 150px auto auto auto;
             gap: 15px;
             align-items: center;
             padding: 8px 0;
@@ -1382,6 +1382,9 @@ try {
             });
 
             const allServices = servicesResponse.ok ? await servicesResponse.json() : [];
+            
+            // Check if we need to show all containers (including orphaned ones)
+            const showAllContainers = CONFIG.stackName === 'ALL';
 
             // Create header
             const headerHtml = `
@@ -1483,6 +1486,81 @@ try {
             
             allStacksContainer.innerHTML = headerHtml;
             allStacksContainer.appendChild(stacksGrid);
+            
+            // Add a section for all containers if showing ALL view
+            if (showAllContainers && allContainers.length > 0) {
+                // Create containers section
+                const containersSection = document.createElement('div');
+                containersSection.style.marginTop = '40px';
+                
+                const containersSectionHtml = `
+                    <h2 style="color: white; text-align: center; margin-bottom: 20px; font-size: 2em; font-weight: 300;">All Containers</h2>
+                    <div class="stacks-grid">
+                `;
+                
+                // Create a single card showing all containers
+                const allContainersCard = document.createElement('div');
+                allContainersCard.className = 'stack-card';
+                allContainersCard.style.gridColumn = '1 / -1'; // Span full width
+                
+                // Count running containers
+                const runningContainers = allContainers.filter(c => c.State === 'running').length;
+                
+                let containerListHtml = `
+                    <h2 style="color: #2c3e50; margin-bottom: 20px; font-size: 1.8em;">Docker Containers</h2>
+                    <div class="stack-info" style="text-align: left; margin-bottom: 20px;">
+                        <p style="margin-bottom: 10px;"><strong>Total Containers:</strong> ${allContainers.length}</p>
+                        <p style="margin-bottom: 10px;"><strong>Running:</strong> ${runningContainers}</p>
+                        <p style="margin-bottom: 10px;"><strong>Stopped:</strong> ${allContainers.length - runningContainers}</p>
+                    </div>
+                    <div class="services-list">
+                        <h4>All Containers:</h4>
+                `;
+                
+                // Sort containers by name
+                allContainers.sort((a, b) => {
+                    const nameA = a.Names ? a.Names[0].replace('/', '') : a.Id.substring(0, 12);
+                    const nameB = b.Names ? b.Names[0].replace('/', '') : b.Id.substring(0, 12);
+                    return nameA.localeCompare(nameB);
+                });
+                
+                // Add each container
+                allContainers.forEach(container => {
+                    const containerName = container.Names ? container.Names[0].replace('/', '') : container.Id.substring(0, 12);
+                    const containerStatus = container.State || 'unknown';
+                    const containerId = container.Id;
+                    const stackLabel = container.Labels?.['com.docker.compose.project'] || container.Labels?.['com.docker.stack.namespace'] || 'No Stack';
+                    
+                    containerListHtml += `
+                        <div class="service-item">
+                            <span>${containerName}</span>
+                            <span style="color: #95a5a6; font-size: 0.9em;">${stackLabel}</span>
+                            <span class="service-status">
+                                <span class="status-indicator ${containerStatus === 'running' ? 'status-running' : 'status-stopped'}"></span>
+                            </span>
+                            <span>${containerStatus}</span>
+                            <div style="display: flex; gap: 5px;">
+                                <button class="btn btn-sm btn-restart" onclick="restartContainer('${containerId}', '${containerName}')" title="Restart container" ${containerStatus !== 'running' ? 'disabled' : ''}>
+                                    <i class="mdi mdi-restart"></i>
+                                </button>
+                                <button class="btn btn-sm btn-logs" onclick="viewContainerLogs('${containerId}', '${containerName}')" title="View logs" ${containerStatus !== 'running' ? 'disabled' : ''}>
+                                    <i class="mdi mdi-text-box-outline"></i>
+                                </button>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                containerListHtml += '</div>';
+                
+                allContainersCard.innerHTML = containerListHtml;
+                
+                containersSection.innerHTML = containersSectionHtml;
+                const containersGrid = containersSection.querySelector('.stacks-grid');
+                containersGrid.appendChild(allContainersCard);
+                
+                allStacksContainer.appendChild(containersSection);
+            }
         }
 
         async function displayStackInfo(stack, services) {
