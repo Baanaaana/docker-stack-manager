@@ -1090,10 +1090,16 @@ try {
         }
 
         async function stopStack(event) {
+            if (!confirm(`Are you sure you want to stop the stack "${CONFIG.stackName}"?`)) {
+                return;
+            }
             await performStackAction('stop', event);
         }
 
         async function restartStack(event) {
+            if (!confirm(`Are you sure you want to restart the stack "${CONFIG.stackName}"?`)) {
+                return;
+            }
             await performStackAction('stop', event);
             setTimeout(() => performStackAction('start', event), 2000);
         }
