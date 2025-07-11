@@ -1518,7 +1518,7 @@ try {
         // Auto-load stack status if configuration is valid
         if (!CONFIG.hasError) {
             window.addEventListener('load', () => {
-                setTimeout(() => getStackStatus(), 1000);
+                setTimeout(() => getStackStatus(null, false), 1000);
                 // Auto-refresh every 10 seconds (silent, no toast)
                 setInterval(() => {
                     getStackStatus(null, false);
