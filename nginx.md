@@ -4,14 +4,14 @@
 # Handle CORS for Docker Stack Manager
 location / {
     # Add CORS headers - Fixed origin
-    add_header Access-Control-Allow-Origin "https://n8n.rrcommerce.nl" always;
+    add_header Access-Control-Allow-Origin "https://sub.domain.com" always;
     add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS" always;
     add_header Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With" always;
     add_header Access-Control-Allow-Credentials true always;
     
     # Handle preflight OPTIONS requests
     if ($request_method = 'OPTIONS') {
-        add_header Access-Control-Allow-Origin "https://n8n.rrcommerce.nl";
+        add_header Access-Control-Allow-Origin "https://sub.domain.com";
         add_header Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS";
         add_header Access-Control-Allow-Headers "Content-Type, Authorization, X-API-Key";
         add_header Access-Control-Allow-Credentials true;
