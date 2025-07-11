@@ -134,13 +134,6 @@ try {
             text-align: center;
         }
         
-        @media (max-width: 968px) {
-            .container {
-                max-width: calc(100% - 40px);
-                padding: 20px;
-            }
-        }
-        
         @media (max-width: 600px) {
             .container {
                 max-width: calc(100% - 20px);
