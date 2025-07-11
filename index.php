@@ -131,16 +131,38 @@ try {
             text-align: center;
         }
 
+        .docker-icon-container {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
         .docker-icon {
             font-size: 6em;
             color: #1d63ed;
-            margin-bottom: 20px;
             display: block;
             transition: transform 0.3s ease;
         }
         
         .docker-icon:hover {
             transform: scale(1.1);
+        }
+
+        .reload-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2em;
+            color: white;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .docker-icon-container:hover .reload-overlay {
+            opacity: 1;
         }
 
         h1 {
@@ -829,7 +851,10 @@ try {
     </div>
     
     <div class="container">
-        <i class="mdi mdi-docker docker-icon" onclick="location.reload()" style="cursor: pointer;" title="Refresh page"></i>
+        <div class="docker-icon-container" onclick="location.reload()" style="cursor: pointer;" title="Refresh page">
+            <i class="mdi mdi-docker docker-icon"></i>
+            <i class="mdi mdi-reload reload-overlay"></i>
+        </div>
         <h1>Docker Stack Manager</h1>
         
         <?php if (isset($error)): ?>
