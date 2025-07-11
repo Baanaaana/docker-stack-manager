@@ -1337,8 +1337,7 @@ try {
                         <h5 style="margin: 0; color: #2c3e50; font-size: 1.2em; flex: 1;">
                             ${stack.Name} 
                             <span style="font-weight: normal; font-size: 0.9em; color: #5a6c7d;">
-                                (${stackType}) - 
-                                <span class="status-indicator ${stackStatusClass}"></span>${stackStatus}
+                                - <span class="status-indicator ${stackStatusClass}"></span>${stackStatus}
                             </span>
                         </h5>
                         <div style="display: flex; gap: 10px; flex-shrink: 0;">
