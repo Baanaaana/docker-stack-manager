@@ -1044,49 +1044,57 @@ try {
                 }
 
                 const stacks = await response.json();
-                const stack = stacks.find(s => s.Name === CONFIG.stackName);
-
-                if (!stack) {
-                    throw new Error(`Stack '${CONFIG.stackName}' not found`);
-                }
-
-                // Get containers for Docker Compose stacks (Type 2)
-                let services = [];
-                if (stack.Type === 2) {
-                    // Docker Compose - get containers
-                    const containersResponse = await fetch(`${CONFIG.portainerUrl}/api/endpoints/${endpointId}/docker/containers/json?all=true`, {
-                        headers: {
-                            'X-API-Key': CONFIG.accessToken
-                        }
-                    });
-
-                    if (containersResponse.ok) {
-                        const allContainers = await containersResponse.json();
-                        services = allContainers.filter(container => 
-                            container.Labels && (
-                                container.Labels['com.docker.compose.project'] === CONFIG.stackName ||
-                                container.Labels['com.docker.stack.namespace'] === CONFIG.stackName
-                            )
-                        );
-                    }
+                
+                if (CONFIG.stackName === 'ALL') {
+                    // Show all stacks
+                    await displayAllStacks(stacks);
+                    showAlert('All stacks status updated successfully');
                 } else {
-                    // Docker Swarm - get services (Type 1)
-                    const servicesResponse = await fetch(`${CONFIG.portainerUrl}/api/endpoints/${endpointId}/docker/services`, {
-                        headers: {
-                            'X-API-Key': CONFIG.accessToken
-                        }
-                    });
+                    // Show single stack
+                    const stack = stacks.find(s => s.Name === CONFIG.stackName);
 
-                    if (servicesResponse.ok) {
-                        const allServices = await servicesResponse.json();
-                        services = allServices.filter(service => 
-                            service.Spec?.Labels?.['com.docker.stack.namespace'] === CONFIG.stackName
-                        );
+                    if (!stack) {
+                        throw new Error(`Stack '${CONFIG.stackName}' not found`);
                     }
-                }
 
-                displayStackInfo(stack, services);
-                showAlert('Stack status updated successfully');
+                    // Get containers for Docker Compose stacks (Type 2)
+                    let services = [];
+                    if (stack.Type === 2) {
+                        // Docker Compose - get containers
+                        const containersResponse = await fetch(`${CONFIG.portainerUrl}/api/endpoints/${endpointId}/docker/containers/json?all=true`, {
+                            headers: {
+                                'X-API-Key': CONFIG.accessToken
+                            }
+                        });
+
+                        if (containersResponse.ok) {
+                            const allContainers = await containersResponse.json();
+                            services = allContainers.filter(container => 
+                                container.Labels && (
+                                    container.Labels['com.docker.compose.project'] === CONFIG.stackName ||
+                                    container.Labels['com.docker.stack.namespace'] === CONFIG.stackName
+                                )
+                            );
+                        }
+                    } else {
+                        // Docker Swarm - get services (Type 1)
+                        const servicesResponse = await fetch(`${CONFIG.portainerUrl}/api/endpoints/${endpointId}/docker/services`, {
+                            headers: {
+                                'X-API-Key': CONFIG.accessToken
+                            }
+                        });
+
+                        if (servicesResponse.ok) {
+                            const allServices = await servicesResponse.json();
+                            services = allServices.filter(service => 
+                                service.Spec?.Labels?.['com.docker.stack.namespace'] === CONFIG.stackName
+                            );
+                        }
+                    }
+
+                    displayStackInfo(stack, services);
+                    showAlert('Stack status updated successfully');
+                }
 
             } catch (error) {
                 showAlert(`Error: ${error.message}`, 'error');
@@ -1102,6 +1110,149 @@ try {
             }
         }
 
+
+        async function displayAllStacks(stacks) {
+            document.getElementById('stackInfo').style.display = 'block';
+            document.getElementById('stackNameDisplay').textContent = 'All Stacks';
+            document.getElementById('stackStatus').innerHTML = `<span class="status-indicator status-running"></span>${stacks.length} stacks found`;
+            
+            // Hide individual stack action buttons for ALL view
+            const startBtn = document.getElementById('startBtn');
+            const stopBtn = document.getElementById('stopBtn');
+            const restartBtn = document.getElementById('restartBtn');
+            if (startBtn) startBtn.style.display = 'none';
+            if (stopBtn) stopBtn.style.display = 'none';
+            if (restartBtn) restartBtn.style.display = 'none';
+
+            // Get all containers at once
+            const containersResponse = await fetch(`${CONFIG.portainerUrl}/api/endpoints/${endpointId}/docker/containers/json?all=true`, {
+                headers: {
+                    'X-API-Key': CONFIG.accessToken
+                }
+            });
+
+            const allContainers = containersResponse.ok ? await containersResponse.json() : [];
+
+            // Get all services at once
+            const servicesResponse = await fetch(`${CONFIG.portainerUrl}/api/endpoints/${endpointId}/docker/services`, {
+                headers: {
+                    'X-API-Key': CONFIG.accessToken
+                }
+            });
+
+            const allServices = servicesResponse.ok ? await servicesResponse.json() : [];
+
+            // Display all stacks
+            const servicesList = document.getElementById('servicesList');
+            servicesList.innerHTML = '<h4>All Stacks:</h4>';
+            
+            // Sort stacks alphabetically
+            stacks.sort((a, b) => a.Name.localeCompare(b.Name));
+            
+            stacks.forEach(stack => {
+                // Create stack section
+                const stackSection = document.createElement('div');
+                stackSection.className = 'stack-section';
+                stackSection.style.marginBottom = '30px';
+                stackSection.style.padding = '20px';
+                stackSection.style.border = '1px solid #e0e0e0';
+                stackSection.style.borderRadius = '8px';
+                stackSection.style.backgroundColor = '#f8f9fa';
+                
+                const stackHeader = document.createElement('div');
+                stackHeader.style.marginBottom = '15px';
+                stackHeader.style.paddingBottom = '10px';
+                stackHeader.style.borderBottom = '1px solid #ddd';
+                
+                const statusClass = stack.Status === 1 ? 'status-running' : 'status-stopped';
+                const statusText = stack.Status === 1 ? 'Running' : 'Stopped';
+                const stackType = stack.Type === 1 ? 'Docker Swarm' : 'Docker Compose';
+                
+                stackHeader.innerHTML = `
+                    <h5 style="margin: 0 0 8px 0; color: #2c3e50;">${stack.Name}</h5>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <span class="status-indicator ${statusClass}"></span>
+                        <span>${statusText} (${stackType})</span>
+                    </div>
+                `;
+                
+                stackSection.appendChild(stackHeader);
+                
+                // Get services/containers for this stack
+                let stackServices = [];
+                if (stack.Type === 2) {
+                    // Docker Compose - get containers
+                    stackServices = allContainers.filter(container => 
+                        container.Labels && (
+                            container.Labels['com.docker.compose.project'] === stack.Name ||
+                            container.Labels['com.docker.stack.namespace'] === stack.Name
+                        )
+                    );
+                } else {
+                    // Docker Swarm - get services
+                    stackServices = allServices.filter(service => 
+                        service.Spec?.Labels?.['com.docker.stack.namespace'] === stack.Name
+                    );
+                }
+                
+                if (stackServices.length > 0) {
+                    // Sort services/containers alphabetically
+                    stackServices.sort((a, b) => {
+                        let nameA, nameB;
+                        if (stack.Type === 1) {
+                            nameA = a.Spec?.Name || '';
+                            nameB = b.Spec?.Name || '';
+                        } else {
+                            nameA = a.Names ? a.Names[0].replace('/', '') : a.Id.substring(0, 12);
+                            nameB = b.Names ? b.Names[0].replace('/', '') : b.Id.substring(0, 12);
+                        }
+                        return nameA.localeCompare(nameB);
+                    });
+                    
+                    stackServices.forEach(service => {
+                        const serviceDiv = document.createElement('div');
+                        serviceDiv.className = 'service-item';
+                        
+                        if (stack.Type === 1) {
+                            // Docker Swarm service
+                            serviceDiv.innerHTML = `
+                                <span>${service.Spec.Name}</span>
+                                <span>${service.Spec.Mode.Replicated ? `${service.Spec.Mode.Replicated.Replicas} replicas` : 'Global'}</span>
+                                <span></span>
+                                <span></span>
+                            `;
+                        } else {
+                            // Docker Compose container
+                            const containerName = service.Names ? service.Names[0].replace('/', '') : service.Id.substring(0, 12);
+                            const containerStatus = service.State || 'unknown';
+                            const containerId = service.Id;
+                            serviceDiv.innerHTML = `
+                                <span>${containerName}</span>
+                                <span class="service-status">
+                                    <span class="status-indicator ${containerStatus === 'running' ? 'status-running' : 'status-stopped'}"></span>
+                                </span>
+                                <span>${containerStatus}</span>
+                                <button class="btn btn-sm btn-restart" onclick="restartContainer('${containerId}', '${containerName}')" title="Restart container" ${containerStatus !== 'running' ? 'disabled' : ''}>
+                                    <i class="mdi mdi-restart"></i>
+                                </button>
+                                <button class="btn btn-sm btn-logs" onclick="viewContainerLogs('${containerId}', '${containerName}')" title="View logs" ${containerStatus !== 'running' ? 'disabled' : ''}>
+                                    <i class="mdi mdi-text-box-outline"></i>
+                                </button>
+                            `;
+                        }
+                        stackSection.appendChild(serviceDiv);
+                    });
+                } else {
+                    const noServicesDiv = document.createElement('div');
+                    noServicesDiv.textContent = stack.Type === 1 ? 'No services found' : 'No containers found';
+                    noServicesDiv.style.fontStyle = 'italic';
+                    noServicesDiv.style.color = '#666';
+                    stackSection.appendChild(noServicesDiv);
+                }
+                
+                servicesList.appendChild(stackSection);
+            });
+        }
 
         async function displayStackInfo(stack, services) {
             document.getElementById('stackInfo').style.display = 'block';
