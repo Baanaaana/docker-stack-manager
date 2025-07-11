@@ -217,9 +217,23 @@ try {
             margin-right: 8px;
         }
 
-        .status-running { background-color: #27ae60; }
+        .status-running { 
+            background-color: #27ae60; 
+            animation: pulse 2s ease-in-out infinite;
+        }
         .status-stopped { background-color: #e74c3c; }
         .status-unknown { background-color: #f39c12; }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+                box-shadow: 0 0 0 0 rgba(39, 174, 96, 0.7);
+            }
+            50% {
+                opacity: 0.7;
+                box-shadow: 0 0 0 4px rgba(39, 174, 96, 0);
+            }
+        }
 
         .button-group {
             display: flex;
@@ -1501,6 +1515,10 @@ try {
         if (!CONFIG.hasError) {
             window.addEventListener('load', () => {
                 setTimeout(() => getStackStatus(), 1000);
+                // Auto-refresh every 10 seconds
+                setInterval(() => {
+                    getStackStatus();
+                }, 10000);
             });
         }
 
