@@ -2,6 +2,8 @@
 
 A beautiful, responsive web interface for managing Docker stacks through Portainer's API. Monitor, control, and view logs for your Docker containers with an intuitive dashboard.
 
+![Docker Stack Manager Screenshot](docker-stack-manager.png)
+
 ![Docker Stack Manager](https://img.shields.io/badge/Docker-Stack%20Manager-blue?style=for-the-badge&logo=docker)
 ![PHP](https://img.shields.io/badge/PHP-777BB4?style=for-the-badge&logo=php&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
