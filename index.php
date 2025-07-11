@@ -114,7 +114,7 @@ try {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 20px 0px;
+            padding: 20px 10px;
         }
 
         body {
@@ -128,7 +128,7 @@ try {
             backdrop-filter: blur(10px);
             border-radius: 20px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
-            padding: 40px;
+            padding: 30px;
             max-width: 900px;
             width: 100%;
             text-align: center;
@@ -137,14 +137,14 @@ try {
         @media (max-width: 968px) {
             .container {
                 max-width: calc(100% - 40px);
-                padding: 30px;
+                padding: 20px;
             }
         }
         
         @media (max-width: 600px) {
             .container {
                 max-width: calc(100% - 20px);
-                padding: 20px;
+                padding: 10px;
                 border-radius: 15px;
             }
         }
