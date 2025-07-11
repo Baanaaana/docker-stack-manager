@@ -769,6 +769,101 @@ try {
             -moz-appearance: textfield;
         }
 
+        /* Responsive Grid for Stacks */
+        .stacks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        @media (min-width: 1200px) {
+            .stacks-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .stacks-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .stack-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .stack-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .stack-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .stack-card-title {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+
+        .stack-card-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9em;
+            color: #5a6c7d;
+        }
+
+        .stack-card-type {
+            font-size: 0.8em;
+            color: #95a5a6;
+            font-style: italic;
+        }
+
+        .stack-card-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: center;
+        }
+
+        .btn-stack-action {
+            padding: 8px 16px;
+            font-size: 14px;
+            min-width: 80px;
+            border-radius: 20px;
+        }
+
+        .stack-card-services {
+            margin-top: 15px;
+        }
+
+        .stack-card-services h5 {
+            margin: 0 0 10px 0;
+            color: #34495e;
+            font-size: 0.9em;
+            font-weight: 600;
+        }
+
+        .service-count {
+            color: #95a5a6;
+            font-size: 0.8em;
+            font-style: italic;
+        }
+
         /* Confirmation Modal Styles */
         .confirm-modal {
             max-width: 450px;
@@ -1219,41 +1314,42 @@ try {
 
             const allServices = servicesResponse.ok ? await servicesResponse.json() : [];
 
-            // Display all stacks
+            // Display all stacks in a responsive grid
             const servicesList = document.getElementById('servicesList');
             servicesList.innerHTML = '<p style="margin-bottom: 15px;"><strong>All Stacks:</strong></p>';
+            
+            // Create grid container
+            const stacksGrid = document.createElement('div');
+            stacksGrid.className = 'stacks-grid';
             
             // Sort stacks alphabetically
             stacks.sort((a, b) => a.Name.localeCompare(b.Name));
             
-            stacks.forEach(stack => {
-                // Create stack section
-                const stackSection = document.createElement('div');
-                stackSection.className = 'stack-section';
-                stackSection.style.marginBottom = '30px';
-                stackSection.style.padding = '20px';
-                stackSection.style.border = '1px solid #e0e0e0';
-                stackSection.style.borderRadius = '8px';
-                stackSection.style.backgroundColor = '#f8f9fa';
+            for (const stack of stacks) {
+                // Create stack card
+                const stackCard = document.createElement('div');
+                stackCard.className = 'stack-card';
                 
+                // Stack header
                 const stackHeader = document.createElement('div');
-                stackHeader.style.marginBottom = '15px';
-                stackHeader.style.paddingBottom = '10px';
-                stackHeader.style.borderBottom = '1px solid #ddd';
+                stackHeader.className = 'stack-card-header';
                 
                 const statusClass = stack.Status === 1 ? 'status-running' : 'status-stopped';
                 const statusText = stack.Status === 1 ? 'Running' : 'Stopped';
                 const stackType = stack.Type === 1 ? 'Docker Swarm' : 'Docker Compose';
                 
                 stackHeader.innerHTML = `
-                    <h5 style="margin: 0 0 8px 0; color: #2c3e50;">${stack.Name}</h5>
-                    <div style="display: flex; align-items: center; gap: 10px;">
+                    <div>
+                        <h4 class="stack-card-title">${stack.Name}</h4>
+                        <div class="stack-card-type">${stackType}</div>
+                    </div>
+                    <div class="stack-card-status">
                         <span class="status-indicator ${statusClass}"></span>
-                        <span>${statusText} (${stackType})</span>
+                        <span>${statusText}</span>
                     </div>
                 `;
                 
-                stackSection.appendChild(stackHeader);
+                stackCard.appendChild(stackHeader);
                 
                 // Get services/containers for this stack
                 let stackServices = [];
@@ -1272,63 +1368,62 @@ try {
                     );
                 }
                 
+                // Services info
+                const servicesInfo = document.createElement('div');
+                servicesInfo.className = 'stack-card-services';
+                
                 if (stackServices.length > 0) {
-                    // Sort services/containers alphabetically
-                    stackServices.sort((a, b) => {
-                        let nameA, nameB;
+                    const runningCount = stackServices.filter(service => {
                         if (stack.Type === 1) {
-                            nameA = a.Spec?.Name || '';
-                            nameB = b.Spec?.Name || '';
+                            return service.Spec?.Mode?.Replicated?.Replicas > 0;
                         } else {
-                            nameA = a.Names ? a.Names[0].replace('/', '') : a.Id.substring(0, 12);
-                            nameB = b.Names ? b.Names[0].replace('/', '') : b.Id.substring(0, 12);
+                            return service.State === 'running';
                         }
-                        return nameA.localeCompare(nameB);
-                    });
+                    }).length;
                     
-                    stackServices.forEach(service => {
-                        const serviceDiv = document.createElement('div');
-                        serviceDiv.className = 'service-item';
-                        
-                        if (stack.Type === 1) {
-                            // Docker Swarm service
-                            serviceDiv.innerHTML = `
-                                <span>${service.Spec.Name}</span>
-                                <span>${service.Spec.Mode.Replicated ? `${service.Spec.Mode.Replicated.Replicas} replicas` : 'Global'}</span>
-                                <span></span>
-                                <span></span>
-                            `;
-                        } else {
-                            // Docker Compose container
-                            const containerName = service.Names ? service.Names[0].replace('/', '') : service.Id.substring(0, 12);
-                            const containerStatus = service.State || 'unknown';
-                            const containerId = service.Id;
-                            serviceDiv.innerHTML = `
-                                <span>${containerName}</span>
-                                <span class="service-status">
-                                    <span class="status-indicator ${containerStatus === 'running' ? 'status-running' : 'status-stopped'}"></span>
-                                </span>
-                                <span>${containerStatus}</span>
-                                <button class="btn btn-sm btn-restart" onclick="restartContainer('${containerId}', '${containerName}')" title="Restart container" ${containerStatus !== 'running' ? 'disabled' : ''}>
-                                    <i class="mdi mdi-restart"></i>
-                                </button>
-                                <button class="btn btn-sm btn-logs" onclick="viewContainerLogs('${containerId}', '${containerName}')" title="View logs" ${containerStatus !== 'running' ? 'disabled' : ''}>
-                                    <i class="mdi mdi-text-box-outline"></i>
-                                </button>
-                            `;
-                        }
-                        stackSection.appendChild(serviceDiv);
-                    });
+                    servicesInfo.innerHTML = `
+                        <h5>${stack.Type === 1 ? 'Services' : 'Containers'}:</h5>
+                        <div class="service-count">${runningCount}/${stackServices.length} running</div>
+                    `;
                 } else {
-                    const noServicesDiv = document.createElement('div');
-                    noServicesDiv.textContent = stack.Type === 1 ? 'No services found' : 'No containers found';
-                    noServicesDiv.style.fontStyle = 'italic';
-                    noServicesDiv.style.color = '#666';
-                    stackSection.appendChild(noServicesDiv);
+                    servicesInfo.innerHTML = `
+                        <h5>${stack.Type === 1 ? 'Services' : 'Containers'}:</h5>
+                        <div class="service-count">None found</div>
+                    `;
                 }
                 
-                servicesList.appendChild(stackSection);
-            });
+                stackCard.appendChild(servicesInfo);
+                
+                // Action buttons
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'stack-card-actions';
+                
+                const isRunning = stack.Status === 1;
+                const actionsHtml = `
+                    <button class="btn btn-stack-action btn-primary" onclick="getStackStatusForStack('${stack.Name}', event)" title="View Details">
+                        <i class="mdi mdi-information-outline"></i> Status
+                    </button>
+                    ${isRunning ? `
+                        <button class="btn btn-stack-action btn-danger" onclick="stopStackAction('${stack.Name}', event)" title="Stop Stack">
+                            <i class="mdi mdi-stop"></i> Stop
+                        </button>
+                        <button class="btn btn-stack-action btn-warning" onclick="restartStackAction('${stack.Name}', event)" title="Restart Stack">
+                            <i class="mdi mdi-restart"></i> Restart
+                        </button>
+                    ` : `
+                        <button class="btn btn-stack-action btn-success" onclick="startStackAction('${stack.Name}', event)" title="Start Stack">
+                            <i class="mdi mdi-play"></i> Start
+                        </button>
+                    `}
+                `;
+                
+                actionsDiv.innerHTML = actionsHtml;
+                stackCard.appendChild(actionsDiv);
+                
+                stacksGrid.appendChild(stackCard);
+            }
+            
+            servicesList.appendChild(stacksGrid);
         }
 
         async function displayStackInfo(stack, services) {
@@ -1555,6 +1650,79 @@ try {
             }
             await performStackAction('stop', event);
             setTimeout(() => performStackAction('start', event), 2000);
+        }
+
+        // Individual stack action functions for ALL view
+        async function getStackStatusForStack(stackName, event) {
+            const originalStackName = CONFIG.stackName;
+            CONFIG.stackName = stackName;
+            
+            try {
+                await getStackStatus(event, true);
+            } finally {
+                CONFIG.stackName = originalStackName;
+            }
+        }
+
+        async function startStackAction(stackName, event) {
+            const originalStackName = CONFIG.stackName;
+            CONFIG.stackName = stackName;
+            
+            try {
+                await performStackAction('start', event);
+                // Refresh the all stacks view
+                setTimeout(() => {
+                    CONFIG.stackName = 'ALL';
+                    getStackStatus(null, false);
+                }, 3000);
+            } finally {
+                CONFIG.stackName = originalStackName;
+            }
+        }
+
+        async function stopStackAction(stackName, event) {
+            const confirmed = await showConfirmation(`Are you sure you want to stop the stack "${stackName}"?`);
+            if (!confirmed) {
+                return;
+            }
+            
+            const originalStackName = CONFIG.stackName;
+            CONFIG.stackName = stackName;
+            
+            try {
+                await performStackAction('stop', event);
+                // Refresh the all stacks view
+                setTimeout(() => {
+                    CONFIG.stackName = 'ALL';
+                    getStackStatus(null, false);
+                }, 3000);
+            } finally {
+                CONFIG.stackName = originalStackName;
+            }
+        }
+
+        async function restartStackAction(stackName, event) {
+            const confirmed = await showConfirmation(`Are you sure you want to restart the stack "${stackName}"?`);
+            if (!confirmed) {
+                return;
+            }
+            
+            const originalStackName = CONFIG.stackName;
+            CONFIG.stackName = stackName;
+            
+            try {
+                await performStackAction('stop', event);
+                setTimeout(async () => {
+                    await performStackAction('start', event);
+                    // Refresh the all stacks view
+                    setTimeout(() => {
+                        CONFIG.stackName = 'ALL';
+                        getStackStatus(null, false);
+                    }, 3000);
+                }, 2000);
+            } finally {
+                CONFIG.stackName = originalStackName;
+            }
         }
 
         // Auto-refresh functionality
