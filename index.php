@@ -872,7 +872,7 @@ try {
         .service-item {
             display: grid;
             grid-template-columns: 1fr auto auto;
-            gap: 12px;
+            gap: 16px;
             align-items: center;
             padding: 10px 0;
             border-bottom: 1px solid #e0e0e0;
@@ -885,13 +885,13 @@ try {
         @media (max-width: 600px) {
             .service-item {
                 grid-template-columns: 1fr auto auto;
-                gap: 8px;
+                gap: 12px;
                 padding: 8px 0;
             }
             
             .service-item.with-actions {
                 grid-template-columns: 1fr auto auto;
-                gap: 8px;
+                gap: 12px;
             }
             
             .service-item span {
