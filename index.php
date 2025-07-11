@@ -127,6 +127,19 @@ try {
             display: block;
         }
 
+        /* Initial layout based on stack name */
+        <?php if ($stackName === 'ALL'): ?>
+        body {
+            display: block;
+        }
+        <?php else: ?>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        <?php endif; ?>
+
         .container {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
@@ -1065,7 +1078,7 @@ try {
         </div>
     </div>
     
-    <div class="container" id="mainContainer">
+    <div class="container" id="mainContainer" <?php echo ($stackName === 'ALL') ? 'style="display: none;"' : ''; ?>>
         <div class="docker-icon-container" onclick="location.reload()" style="cursor: pointer;" title="Refresh page">
             <i class="mdi mdi-docker docker-icon"></i>
             <i class="mdi mdi-reload reload-overlay"></i>
