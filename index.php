@@ -1144,7 +1144,7 @@ try {
 
             // Display all stacks
             const servicesList = document.getElementById('servicesList');
-            servicesList.innerHTML = '<h4>All Stacks:</h4>';
+            servicesList.innerHTML = '<p style="margin-bottom: 15px;"><strong>All Stacks:</strong></p>';
             
             // Sort stacks alphabetically
             stacks.sort((a, b) => a.Name.localeCompare(b.Name));
