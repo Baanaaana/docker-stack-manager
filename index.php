@@ -679,6 +679,10 @@ try {
             max-width: 450px;
             text-align: center;
             padding: 40px;
+            margin: auto;
+            position: relative;
+            top: 50%;
+            transform: translateY(-50%);
         }
 
         .confirm-icon {
@@ -1379,6 +1383,12 @@ try {
             // Start auto-refresh if enabled
             if (document.getElementById('streamLogs').checked) {
                 startAutoRefresh();
+                // Disable refresh button during auto-refresh
+                const refreshBtn = document.querySelector('.logs-controls .btn-primary');
+                if (refreshBtn) {
+                    refreshBtn.disabled = true;
+                    refreshBtn.title = 'Auto-refresh is enabled';
+                }
             }
         }
         
@@ -1436,11 +1446,22 @@ try {
 
         function toggleStreaming() {
             const streamCheckbox = document.getElementById('streamLogs');
+            const refreshBtn = document.querySelector('.logs-controls .btn-primary');
             
             if (streamCheckbox.checked) {
                 startAutoRefresh();
+                // Disable refresh button during auto-refresh
+                if (refreshBtn) {
+                    refreshBtn.disabled = true;
+                    refreshBtn.title = 'Auto-refresh is enabled';
+                }
             } else {
                 stopAutoRefresh();
+                // Enable refresh button
+                if (refreshBtn) {
+                    refreshBtn.disabled = false;
+                    refreshBtn.title = '';
+                }
             }
         }
         
