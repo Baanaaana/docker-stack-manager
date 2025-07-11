@@ -138,7 +138,7 @@ try {
         }
 
         .docker-icon {
-            font-size: 6em;
+            font-size: 8em;
             color: #1d63ed;
             display: block;
             transition: transform 0.3s ease;
@@ -155,13 +155,13 @@ try {
                 transform: translateY(0px) rotate(0deg);
             }
             25% {
-                transform: translateY(-3px) rotate(0.5deg);
+                transform: translateY(-8px) rotate(1deg);
             }
             50% {
-                transform: translateY(-1px) rotate(0deg);
+                transform: translateY(-4px) rotate(0deg);
             }
             75% {
-                transform: translateY(-2px) rotate(-0.5deg);
+                transform: translateY(-6px) rotate(-1deg);
             }
         }
 
