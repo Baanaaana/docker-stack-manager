@@ -891,23 +891,31 @@ try {
         
         @media (max-width: 600px) {
             .service-item {
-                grid-template-columns: 1fr auto;
-                gap: 10px;
+                grid-template-columns: 1fr auto auto auto;
+                gap: 8px;
+                padding: 8px 0;
             }
             
             .service-item.with-actions {
-                grid-template-columns: 1fr auto;
+                grid-template-columns: 1fr auto 80px 70px;
+                gap: 6px;
             }
             
-            .service-item > span:nth-child(3),
-            .service-item > .service-status {
-                display: none;
+            .service-item span {
+                font-size: 0.85em;
+            }
+            
+            .service-item .btn-sm {
+                padding: 4px 6px;
+                font-size: 12px;
+                min-width: auto;
+                width: 28px;
+                height: 28px;
+                border-radius: 50%;
             }
             
             .service-item > div {
-                grid-column: 1 / -1;
-                justify-content: flex-start !important;
-                margin-top: 8px;
+                gap: 4px !important;
             }
         }
         
