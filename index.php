@@ -129,9 +129,24 @@ try {
             border-radius: 20px;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             padding: 40px;
-            max-width: 600px;
+            max-width: 900px;
             width: 100%;
             text-align: center;
+        }
+        
+        @media (max-width: 968px) {
+            .container {
+                max-width: calc(100% - 40px);
+                padding: 30px;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                max-width: calc(100% - 20px);
+                padding: 20px;
+                border-radius: 15px;
+            }
         }
 
 
@@ -147,6 +162,12 @@ try {
             display: block;
             transition: transform 0.3s ease;
             animation: float 3s ease-in-out infinite;
+        }
+        
+        @media (max-width: 600px) {
+            .docker-icon {
+                font-size: 6em;
+            }
         }
         
         .docker-icon:hover {
@@ -192,6 +213,13 @@ try {
             font-size: 2.5em;
             font-weight: 300;
         }
+        
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 2em;
+                margin-bottom: 20px;
+            }
+        }
 
         .config-section {
             margin-bottom: 30px;
@@ -211,6 +239,13 @@ try {
             margin: 20px 0;
             border-left: 4px solid #667eea;
             text-align: left;
+        }
+        
+        @media (max-width: 600px) {
+            .stack-info {
+                padding: 15px;
+                margin: 15px 0;
+            }
         }
 
         .status-indicator {
@@ -245,6 +280,19 @@ try {
             justify-content: center;
             margin-top: 30px;
             flex-wrap: wrap;
+        }
+        
+        @media (max-width: 600px) {
+            .button-group {
+                gap: 10px;
+                margin-top: 20px;
+            }
+            
+            .button-group .btn {
+                padding: 10px 20px;
+                font-size: 14px;
+                min-width: 100px;
+            }
         }
 
         .btn {
@@ -833,12 +881,34 @@ try {
             grid-template-columns: 1fr auto 120px auto;
             gap: 15px;
             align-items: center;
-            padding: 8px 0;
+            padding: 10px 0;
             border-bottom: 1px solid #e0e0e0;
         }
         
         .service-item.with-actions {
             grid-template-columns: 1fr auto 120px 100px;
+        }
+        
+        @media (max-width: 600px) {
+            .service-item {
+                grid-template-columns: 1fr auto;
+                gap: 10px;
+            }
+            
+            .service-item.with-actions {
+                grid-template-columns: 1fr auto;
+            }
+            
+            .service-item > span:nth-child(3),
+            .service-item > .service-status {
+                display: none;
+            }
+            
+            .service-item > div {
+                grid-column: 1 / -1;
+                justify-content: flex-start !important;
+                margin-top: 8px;
+            }
         }
         
         .service-status {
