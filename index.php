@@ -152,9 +152,15 @@ try {
         }
 
         .all-stacks-container {
-            max-width: 1400px;
+            max-width: 100%;
             margin: 0 auto;
-            padding: 20px;
+            padding: 20px 40px;
+        }
+        
+        @media (max-width: 768px) {
+            .all-stacks-container {
+                padding: 20px;
+            }
         }
 
         .all-stacks-header {
@@ -836,13 +842,17 @@ try {
         /* Responsive Grid for Stacks */
         .stacks-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+            grid-template-columns: 1fr;
             gap: 25px;
             margin-top: 20px;
         }
 
+        .stacks-grid.compact {
+            grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+        }
+
         @media (min-width: 1200px) {
-            .stacks-grid {
+            .stacks-grid.compact {
                 grid-template-columns: repeat(3, 1fr);
             }
         }
@@ -986,11 +996,15 @@ try {
 
         .service-item {
             display: grid;
-            grid-template-columns: 1fr auto auto auto;
+            grid-template-columns: 1fr auto 120px auto;
             gap: 15px;
             align-items: center;
             padding: 8px 0;
             border-bottom: 1px solid #e0e0e0;
+        }
+        
+        .service-item.with-actions {
+            grid-template-columns: 1fr auto 120px 100px;
         }
         
         .service-status {
@@ -1477,13 +1491,13 @@ try {
                             const containerStatus = service.State || 'unknown';
                             const containerId = service.Id;
                             servicesListHtml += `
-                                <div class="service-item" style="grid-template-columns: 1fr auto auto auto;">
+                                <div class="service-item with-actions">
                                     <span>${containerName}</span>
                                     <span class="service-status">
                                         <span class="status-indicator ${containerStatus === 'running' ? 'status-running' : 'status-stopped'}"></span>
                                     </span>
                                     <span>${containerStatus}</span>
-                                    <div style="display: flex; gap: 5px;">
+                                    <div style="display: flex; gap: 5px; justify-content: flex-end;">
                                         <button class="btn btn-sm btn-restart" onclick="restartContainer('${containerId}', '${containerName}')" title="Restart container" ${containerStatus !== 'running' ? 'disabled' : ''}>
                                             <i class="mdi mdi-restart"></i>
                                         </button>
@@ -1607,7 +1621,7 @@ try {
                 
                 services.forEach(service => {
                     const serviceDiv = document.createElement('div');
-                    serviceDiv.className = 'service-item';
+                    serviceDiv.className = stack.Type === 1 ? 'service-item' : 'service-item with-actions';
                     
                     if (stack.Type === 1) {
                         // Docker Swarm service
@@ -1626,12 +1640,14 @@ try {
                                 <span class="status-indicator ${containerStatus === 'running' ? 'status-running' : 'status-stopped'}"></span>
                             </span>
                             <span>${containerStatus}</span>
-                            <button class="btn btn-sm btn-restart" onclick="restartContainer('${containerId}', '${containerName}')" title="Restart container" ${containerStatus !== 'running' ? 'disabled' : ''}>
-                                <i class="mdi mdi-restart"></i>
-                            </button>
-                            <button class="btn btn-sm btn-logs" onclick="viewContainerLogs('${containerId}', '${containerName}')" title="View logs" ${containerStatus !== 'running' ? 'disabled' : ''}>
-                                <i class="mdi mdi-text-box-outline"></i>
-                            </button>
+                            <div style="display: flex; gap: 5px; justify-content: flex-end;">
+                                <button class="btn btn-sm btn-restart" onclick="restartContainer('${containerId}', '${containerName}')" title="Restart container" ${containerStatus !== 'running' ? 'disabled' : ''}>
+                                    <i class="mdi mdi-restart"></i>
+                                </button>
+                                <button class="btn btn-sm btn-logs" onclick="viewContainerLogs('${containerId}', '${containerName}')" title="View logs" ${containerStatus !== 'running' ? 'disabled' : ''}>
+                                    <i class="mdi mdi-text-box-outline"></i>
+                                </button>
+                            </div>
                         `;
                     }
                     servicesList.appendChild(serviceDiv);
