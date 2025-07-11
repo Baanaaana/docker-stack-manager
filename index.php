@@ -514,9 +514,14 @@ try {
         .btn-logs {
             background: linear-gradient(45deg, #3498db, #2980b9);
             color: white;
-            padding: 6px 12px;
-            font-size: 13px;
-            border-radius: 20px;
+            padding: 8px;
+            font-size: 16px;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .btn-logs:hover {
@@ -527,9 +532,14 @@ try {
         .btn-restart {
             background: linear-gradient(45deg, #f39c12, #e67e22);
             color: white;
-            padding: 6px 12px;
-            font-size: 13px;
-            border-radius: 20px;
+            padding: 8px;
+            font-size: 16px;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .btn-restart:hover {
@@ -945,11 +955,11 @@ try {
                                 <span class="status-indicator ${containerStatus === 'running' ? 'status-running' : 'status-stopped'}"></span>
                             </span>
                             <span>${containerStatus}</span>
-                            <button class="btn btn-sm btn-restart" onclick="restartContainer('${containerId}', '${containerName}')" ${containerStatus !== 'running' ? 'disabled' : ''}>
-                                <i class="mdi mdi-restart"></i> Restart
+                            <button class="btn btn-sm btn-restart" onclick="restartContainer('${containerId}', '${containerName}')" title="Restart container" ${containerStatus !== 'running' ? 'disabled' : ''}>
+                                <i class="mdi mdi-restart"></i>
                             </button>
-                            <button class="btn btn-sm btn-logs" onclick="viewContainerLogs('${containerId}', '${containerName}')" ${containerStatus !== 'running' ? 'disabled' : ''}>
-                                <i class="mdi mdi-text-box-outline"></i> Logs
+                            <button class="btn btn-sm btn-logs" onclick="viewContainerLogs('${containerId}', '${containerName}')" title="View logs" ${containerStatus !== 'running' ? 'disabled' : ''}>
+                                <i class="mdi mdi-text-box-outline"></i>
                             </button>
                         `;
                     }
