@@ -627,6 +627,53 @@ try {
             font-weight: 500;
         }
 
+        /* Styled Number Input */
+        .lines-input-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .lines-label {
+            font-size: 14px;
+            color: #5a6c7d;
+            font-weight: 500;
+        }
+
+        .lines-input {
+            width: 80px;
+            padding: 8px 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 14px;
+            color: #2c3e50;
+            background: white;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .lines-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .lines-input:hover {
+            border-color: #667eea;
+        }
+
+        /* Remove spinner buttons in some browsers */
+        .lines-input::-webkit-inner-spin-button,
+        .lines-input::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .lines-input[type=number] {
+            -moz-appearance: textfield;
+        }
+
         /* Confirmation Modal Styles */
         .confirm-modal {
             max-width: 450px;
@@ -736,9 +783,10 @@ try {
                         <span class="toggle-slider"></span>
                         <span class="toggle-label">Auto-scroll</span>
                     </label>
-                    <label style="display: flex; align-items: center; gap: 8px; color: #5a6c7d;">
-                        Lines: <input type="number" id="logLines" value="100" min="10" max="1000" style="width: 80px; padding: 4px 8px; border: 1px solid #ddd; border-radius: 4px;">
-                    </label>
+                    <div class="lines-input-group">
+                        <span class="lines-label">Lines:</span>
+                        <input type="number" id="logLines" value="100" min="10" max="1000" class="lines-input">
+                    </div>
                     <button class="btn btn-sm btn-primary" onclick="refreshLogs()">
                         <span class="btn-spinner" style="display: none;"></span>
                         <span class="btn-text">Refresh</span>
